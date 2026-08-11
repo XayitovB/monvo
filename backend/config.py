@@ -24,6 +24,9 @@ class Settings(BaseSettings):
     ADMIN_USERNAME: str = "admin"
     ADMIN_PASSWORD: str = "admin"
     ADMIN_SECRET_KEY: str = "admin-secret-key-change-in-production"
+    # Login sahifasida ko'rsatiladigan matn (masalan test login/parol eslatmasi).
+    # Bo'sh bo'lsa hech narsa ko'rsatilmaydi. Ommaga chiqishdan oldin bo'shating!
+    ADMIN_LOGIN_HINT: str = ""
 
     # ── CORS ─────────────────────────────────────────────────────────────────
     # Vergul bilan ajratilgan ro'yxat. Production da `.env`da quyidagicha:

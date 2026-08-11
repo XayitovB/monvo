@@ -21,6 +21,15 @@ export default function BusinessLogin() {
   const [showPw, setShowPw] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [loginHint, setLoginHint] = useState('')
+
+  useEffect(() => {
+    if (location.pathname !== '/panel/login') return
+    fetch('/admin/login-hint')
+      .then(r => r.json())
+      .then(d => setLoginHint(d?.text || ''))
+      .catch(() => {})
+  }, [location.pathname])
 
   // Allaqachon login bo'lsa darhol panelga yo'naltirish
   useEffect(() => {
@@ -192,6 +201,12 @@ export default function BusinessLogin() {
           <div className="al-footnote">
             Biznes egasimi? <a href="https://monvo.uz" style={{ color: 'inherit', textDecoration: 'underline' }}>monvo.uz</a> orqali ro'yxatdan o'ting.
           </div>
+
+          {loginHint && (
+            <div style={{ marginTop: 10, fontSize: 11.5, opacity: 0.55, textAlign: 'center' }}>
+              {loginHint}
+            </div>
+          )}
         </div>
       </div>
     </div>
