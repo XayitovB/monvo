@@ -15,9 +15,12 @@ from main import limiter
 router = APIRouter(tags=["💬 Support Chat"])
 
 
-@router.get("/admin/login-hint", summary="Login sahifasi uchun test hint (ADMIN_LOGIN_HINT env)")
+@router.get("/admin/login-hint", summary="Login sahifasi uchun test hint (ADMIN/MERCHANT_LOGIN_HINT env)")
 async def admin_login_hint():
-    return {"text": settings.ADMIN_LOGIN_HINT or None}
+    return {
+        "admin": settings.ADMIN_LOGIN_HINT or None,
+        "merchant": settings.MERCHANT_LOGIN_HINT or None,
+    }
 
 _FALLBACK_UZ = (
     "Kechirasiz, hozircha javob bera olmayapman. "
