@@ -593,6 +593,7 @@ export const STRINGS = {
     ],
 
     app_dl_eyebrow: 'Клиентское приложение',
+    store_soon: 'Скоро',
     app_dl_cards: 'активных карт',
 
     dash_preview: {
@@ -1218,6 +1219,7 @@ export const STRINGS = {
     ],
 
     app_dl_eyebrow: 'Mijoz ilovasi',
+    store_soon: 'Tez kunda',
     app_dl_cards: 'aktiv kartalar',
 
     dash_preview: {
@@ -1849,6 +1851,7 @@ export const STRINGS = {
     ],
 
     app_dl_eyebrow: 'Customer app',
+    store_soon: 'Coming soon',
     app_dl_cards: 'active cards',
 
     dash_preview: {

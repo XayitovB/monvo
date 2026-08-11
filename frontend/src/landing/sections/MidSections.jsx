@@ -358,8 +358,8 @@ export function AppPreview({ T }) {
               ))}
             </div>
             <div style={{ display: 'flex', gap: 10, marginTop: 32 }}>
-              <StoreBtn store="apple"/>
-              <StoreBtn store="google"/>
+              <StoreBtn store="apple" soonLabel={T.store_soon}/>
+              <StoreBtn store="google" soonLabel={T.store_soon}/>
             </div>
           </div>
         </div>

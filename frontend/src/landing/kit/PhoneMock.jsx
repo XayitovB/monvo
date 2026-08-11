@@ -138,8 +138,14 @@ const STORE_URLS = {
   apple: 'https://apps.apple.com/app/monvo/id6781256822',
 };
 
-export function StoreBtn({ store }) {
-  const url = STORE_URLS[store] || '';
+// Ilovalar hali App Store / Play Market'da e'lon qilinmagan — havolalar
+// o'chirilgan va "Tez kunda" belgisi ko'rsatiladi. Chiqqach shu flag'ni
+// true qiling — havolalar va belgisi avtomatik yo'qoladi.
+const STORES_LIVE = false;
+
+export function StoreBtn({ store, soonLabel }) {
+  const url = STORES_LIVE ? (STORE_URLS[store] || '') : '';
+  const soon = !STORES_LIVE && soonLabel;
   return (
     <a
       href={url || '#'}
@@ -147,11 +153,21 @@ export function StoreBtn({ store }) {
       rel={url ? 'noreferrer' : undefined}
       onClick={url ? undefined : (e) => e.preventDefault()}
       style={{
+      position: 'relative',
       display: 'inline-flex', alignItems: 'center', gap: 12,
       padding: '10px 18px', background: 'var(--k-ink)', color: 'var(--k-bg)',
       borderRadius: 12, textDecoration: 'none', minWidth: 168,
       opacity: url ? 1 : 0.6, cursor: url ? 'pointer' : 'default',
     }}>
+      {soon && (
+        <span style={{
+          position: 'absolute', top: -9, right: -8,
+          background: 'var(--k-brand, #2F6B3F)', color: '#fff',
+          fontSize: 10, fontWeight: 700, letterSpacing: 0.3,
+          padding: '3px 8px', borderRadius: 999, whiteSpace: 'nowrap',
+          boxShadow: '0 2px 6px rgba(0,0,0,.25)',
+        }}>{soonLabel}</span>
+      )}
       {store === 'apple' ? <AppleLogo size={26}/> : <GoogleLogo size={24}/>}
       <span>
         <span style={{ display: 'block', fontSize: 9.5, opacity: 0.7, letterSpacing: 0.6, textTransform: 'uppercase' }}>
