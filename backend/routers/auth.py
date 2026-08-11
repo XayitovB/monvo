@@ -27,7 +27,7 @@ from core.dependencies import get_current_user, log_action
 from core.login_security import record_login_attempt, safe_verify_password
 from core.pos_engine import normalize_phone
 from core.security import create_access_token, create_staff_token, hash_password, verify_password
-from core.sms import send_otp_sms
+from core.sms import generate_otp_code, send_otp_sms
 from database import get_db
 from models import PhoneOTP, User
 from schemas import GoogleAuthRequest, PhoneOTPRequest, PhoneVerifyRequest, TokenResponse, UserOut, UserRegister
@@ -38,7 +38,7 @@ from main import limiter as _limiter
 
 
 def _generate_otp() -> str:
-    return "".join(secrets.choice(string.digits) for _ in range(6))
+    return generate_otp_code(6)
 
 
 # ── Phone OTP Auth ───────────────────────────────────────────────────────────

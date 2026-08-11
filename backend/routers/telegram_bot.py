@@ -143,7 +143,8 @@ def _L(lang: str) -> dict:
 
 
 def _otp_code() -> str:
-    return "".join(secrets.choice(string.digits) for _ in range(6))
+    from core.sms import generate_otp_code
+    return generate_otp_code(6)
 
 
 def _parse_start_merchant(text: str) -> int | None:

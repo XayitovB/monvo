@@ -27,7 +27,7 @@ from core.tariff_gate import enforce_limit
 from core.fcm import send_fcm_multicast
 from core.sms import send_bulk_sms
 from core.security import create_merchant_token, hash_password, verify_password
-from core.sms import send_otp_sms
+from core.sms import generate_otp_code, send_otp_sms
 from core.geocode import geocode_address
 from database import get_db
 from core.dependencies import get_current_admin
@@ -421,7 +421,7 @@ async def staff_send_otp(
 
     # Reuse the same PhoneOTP table the user-side phone login uses.
     await db.execute(delete(PhoneOTP).where(PhoneOTP.phone == phone))
-    code = "".join(secrets.choice("0123456789") for _ in range(4))
+    code = generate_otp_code(4)
     db.add(PhoneOTP(
         phone=phone,
         code=code,

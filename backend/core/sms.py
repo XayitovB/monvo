@@ -11,6 +11,8 @@ SMS_ENABLED/creds bo'lmasa — kodni faqat logga yozadi (dev rejim).
 """
 import asyncio
 import re
+import secrets
+import string
 import time
 from typing import Iterable, Optional
 
@@ -56,6 +58,19 @@ def normalize_uz_phone(raw: Optional[str]) -> Optional[str]:
 
 def _is_configured() -> bool:
     return bool(getattr(settings, "ESKIZ_EMAIL", "") and getattr(settings, "ESKIZ_PASSWORD", ""))
+
+
+def generate_otp_code(length: int = 6) -> str:
+    """Tasdiqlash kodi yaratadi.
+
+    Eskiz hali ulanmagan bo'lsa (SMS haqiqatda yuborilmaydi) — doim "123456"
+    (yoki so'ralgan uzunlikka kesilgan holati) qaytaradi, shunda foydalanuvchi
+    server logiga qaramasdan kira oladi. Eskiz ulangach avtomatik tasodifiy
+    kodga o'tadi.
+    """
+    if not _is_configured():
+        return "123456"[:length]
+    return "".join(secrets.choice(string.digits) for _ in range(length))
 
 
 async def _get_token(client: httpx.AsyncClient, force: bool = False) -> Optional[str]:
