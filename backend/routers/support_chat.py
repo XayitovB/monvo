@@ -4,8 +4,6 @@ Public endpoint (auth talab qilmaydi). GigaChat sozlanmagan yoki xatolik
 bo'lsa ham 200 qaytaradi (ok=false + qulay xabar) — vidjet hech qachon
 buzilib ko'rinmasligi kerak.
 """
-from __future__ import annotations
-
 from fastapi import APIRouter, Request
 from loguru import logger
 from pydantic import BaseModel, Field
