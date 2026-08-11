@@ -10,7 +10,6 @@ import 'leaflet/dist/leaflet.css'
 import QRCode from 'qrcode'
 import { api } from '../api'
 import './Table.css'
-import posterSrc from '../../assets/qr-poster-v1.png'
 
 const TABS = [
   { key: 'overview',      label: 'Umumiy',          icon: 'bi-speedometer2' },
@@ -1050,9 +1049,6 @@ function BranchesTab({ branches = [], staff = [], merchantId, reload }) {
   )
 }
 
-/* ── QR_BOX: poster (v1.png) ichidagi oq kvadrat koordinatalari ── */
-const QR_BOX = { leftPct: 0.115, topPct: 0.431, sizePctW: 0.484 }
-
 /* ── Merchant QR (mijoz signup QR'i) ── */
 function MerchantQrCard({ merchantId, merchantName }) {
   const smartUrl = merchantId ? `${window.location.origin}/j/${merchantId}` : ''
@@ -1086,26 +1082,6 @@ function MerchantQrCard({ merchantId, merchantName }) {
     })
   }
 
-  async function downloadPoster() {
-    if (!png) return
-    function loadImg(src) {
-      return new Promise((res, rej) => {
-        const i = new Image(); i.crossOrigin = 'anonymous'
-        i.onload = () => res(i); i.onerror = rej; i.src = src
-      })
-    }
-    const [poster, qr] = await Promise.all([loadImg(posterSrc), loadImg(png)])
-    const canvas = document.createElement('canvas')
-    canvas.width = poster.naturalWidth; canvas.height = poster.naturalHeight
-    const ctx = canvas.getContext('2d')
-    ctx.drawImage(poster, 0, 0)
-    const qrSize = canvas.width * QR_BOX.sizePctW
-    ctx.drawImage(qr, canvas.width * QR_BOX.leftPct, canvas.height * QR_BOX.topPct, qrSize, qrSize)
-    const blob = await new Promise(r => canvas.toBlob(r, 'image/png'))
-    const safe = (merchantName || 'merchant').replace(/\s+/g, '-').toLowerCase()
-    downloadBlob(blob, `monvo-plakat-${safe}.png`)
-  }
-
   async function copyLink() {
     try { await navigator.clipboard.writeText(smartUrl); setCopiedLink(true); setTimeout(() => setCopiedLink(false), 1500) } catch {}
   }
@@ -1129,22 +1105,11 @@ function MerchantQrCard({ merchantId, merchantName }) {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '200px 1fr', gap: 20, alignItems: 'start' }}>
-        {/* Poster preview */}
-        <div style={{ position: 'relative', borderRadius: 10, overflow: 'hidden', border: '1px solid var(--a-border)', background: '#fff' }}>
-          <img src={posterSrc} alt="Poster" style={{ width: '100%', display: 'block' }} />
-          {png && (
-            <img src={png} alt="QR" style={{
-              position: 'absolute',
-              left: `${QR_BOX.leftPct * 100}%`,
-              top: `${QR_BOX.topPct * 100}%`,
-              width: `${QR_BOX.sizePctW * 100}%`,
-            }} />
-          )}
-          {!png && (
-            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <div className="a-spinner" style={{ width: 24, height: 24 }} />
-            </div>
-          )}
+        {/* QR preview */}
+        <div style={{ borderRadius: 10, overflow: 'hidden', border: '1px solid var(--a-border)', background: '#fff', aspectRatio: '1 / 1', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {png
+            ? <img src={png} alt="QR" style={{ width: '86%', display: 'block' }} />
+            : <div className="a-spinner" style={{ width: 24, height: 24 }} />}
         </div>
 
         {/* Actions */}
@@ -1155,11 +1120,8 @@ function MerchantQrCard({ merchantId, merchantName }) {
             borderRadius: 7, display: 'block',
           }}>{smartUrl}</code>
 
-          <button className="a-btn a-btn-primary" onClick={downloadPoster} disabled={!png} style={{ gap: 6, justifyContent: 'center' }}>
-            <i className="bi bi-download" /> Plakatni yuklab olish (PNG)
-          </button>
-          <button className="a-btn a-btn-secondary" onClick={downloadQr} disabled={!png} style={{ gap: 6, justifyContent: 'center' }}>
-            <i className="bi bi-qr-code" /> Faqat QR (PNG)
+          <button className="a-btn a-btn-primary" onClick={downloadQr} disabled={!png} style={{ gap: 6, justifyContent: 'center' }}>
+            <i className="bi bi-qr-code" /> QR kodni yuklab olish (PNG)
           </button>
           <div style={{ height: 1, background: 'var(--a-border)', margin: '2px 0' }} />
           <div style={{ display: 'flex', gap: 8 }}>

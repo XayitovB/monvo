@@ -5,12 +5,6 @@ import { I, T, Button, Surface } from '../kit';
 import Topbar from '../layout/Topbar';
 import { useLang } from '../i18n/LangContext';
 import { useAuth } from '../auth/AuthContext';
-import posterSrc from '../../assets/qr-poster-v1.png';
-
-// Poster (v1.png) ichidagi oq kvadratga QR joylashuvi (rasm o'lchamiga nisbatan %).
-// Oq kvadrat: left 9.6% top 42.6% 52.3%×35.1% → markaz (35.7%, 60.2%).
-// QR ~1200px (oq kvadratni deyarli to'liq to'ldiradi, ~50px margin).
-const QR_BOX = { leftPct: 0.115, topPct: 0.431, sizePctW: 0.484 };
 
 export default function QrCodes() {
   const { t, lang } = useLang();
@@ -104,31 +98,6 @@ export default function QrCodes() {
     pdf.save(`monvo-qr-${Date.now()}.pdf`);
   }
 
-  function loadImage(src) {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      img.onload = () => resolve(img);
-      img.onerror = reject;
-      img.src = src;
-    });
-  }
-
-  // Poster (v1.png) + QR ni oq kvadratga joylab, bosma sifatли PNG yuklaydi.
-  async function downloadPoster() {
-    if (!pngDataUrl) return;
-    const [poster, qr] = await Promise.all([loadImage(posterSrc), loadImage(pngDataUrl)]);
-    const canvas = document.createElement('canvas');
-    canvas.width = poster.naturalWidth;   // 2480
-    canvas.height = poster.naturalHeight; // 3508
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(poster, 0, 0);
-    const qrSize = canvas.width * QR_BOX.sizePctW;
-    ctx.drawImage(qr, canvas.width * QR_BOX.leftPct, canvas.height * QR_BOX.topPct, qrSize, qrSize);
-    const blob = await new Promise((r) => canvas.toBlob(r, 'image/png'));
-    downloadBlob(blob, `monvo-plakat-${Date.now()}.png`);
-  }
-
   async function copyImg() {
     try {
       const blob = await (await fetch(pngDataUrl)).blob();
@@ -150,27 +119,17 @@ export default function QrCodes() {
           <Surface padding={20} style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
             <div style={{ ...T.h2, alignSelf: 'flex-start' }}>{t('qr.preview')}</div>
             <div style={{
-              position: 'relative', width: '100%', maxWidth: 300,
+              width: '100%', maxWidth: 300, aspectRatio: '1 / 1',
               borderRadius: 12, overflow: 'hidden', border: '1px solid var(--m-line)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff',
             }}>
-              <img src={posterSrc} alt="Poster" style={{ width: '100%', display: 'block' }}/>
-              {pngDataUrl && (
-                <img src={pngDataUrl} alt="QR" style={{
-                  position: 'absolute',
-                  left: `${QR_BOX.leftPct * 100}%`,
-                  top: `${QR_BOX.topPct * 100}%`,
-                  width: `${QR_BOX.sizePctW * 100}%`,
-                }}/>
-              )}
+              {pngDataUrl && <img src={pngDataUrl} alt="QR" style={{ width: '82%', display: 'block' }}/>}
             </div>
           </Surface>
 
           <Surface padding={20}>
             <div style={{ ...T.h2, marginBottom: 12 }}>{t('qr.download.title')}</div>
-            <Button variant="primary" full icon={<I.download/>} onClick={downloadPoster} disabled={!pngDataUrl} style={{ marginBottom: 8 }}>
-              {lang === 'ru' ? 'Скачать плакат (PNG)' : 'Plakatni yuklab olish (PNG)'}
-            </Button>
-            <Button variant="secondary" full icon={<I.download/>} onClick={downloadPng} disabled={!pngDataUrl}>
+            <Button variant="primary" full icon={<I.download/>} onClick={downloadPng} disabled={!pngDataUrl} style={{ marginBottom: 8 }}>
               {lang === 'ru' ? 'Скачать QR-код (PNG)' : 'QR kodni yuklab olish (PNG)'}
             </Button>
             <div style={{ height: 1, background: 'var(--m-line)', margin: '14px 0' }}/>
