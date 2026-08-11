@@ -40,9 +40,14 @@ export default function Login() {
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [loginHint, setLoginHint] = useState(null);
 
   useEffect(() => {
     document.title = 'Monvo Business — Login';
+    fetch('/admin/login-hint')
+      .then(r => r.json())
+      .then(d => setLoginHint(d))
+      .catch(() => {});
   }, []);
 
   async function onSubmit(e) {
@@ -208,6 +213,13 @@ export default function Login() {
                 {t('login.register')}
               </a>
             </div>
+
+            {(loginHint?.admin || loginHint?.merchant) && (
+              <div style={{ marginTop: 4, fontSize: 11.5, opacity: 0.55, textAlign: 'center', lineHeight: 1.6 }}>
+                {loginHint.admin && <div>{loginHint.admin}</div>}
+                {loginHint.merchant && <div>{loginHint.merchant}</div>}
+              </div>
+            )}
           </div>
         </div>
       </div>
