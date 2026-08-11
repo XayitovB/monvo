@@ -196,6 +196,22 @@ async def _join_merchant_by_tg(tg_id: str, merchant_id: int) -> str | None:
         return merchant.business_name
 
 
+_BOT_BANNER_VER: str | None = None
+
+
+def _bot_banner_url(base: str) -> str:
+    # Telegram rasmni URL bo'yicha keshlaydi — fayl o'zgarsa ham eski versiyani
+    # ko'rsataveradi. `?v=<mtime>` query bilan URL'ni o'zgartirib, har banner
+    # yangilanganda Telegram'ni majburan qayta yuklashga majbur qilamiz.
+    global _BOT_BANNER_VER
+    if _BOT_BANNER_VER is None:
+        try:
+            _BOT_BANNER_VER = str(int(os.path.getmtime(os.path.join("tg-static", "bot-banner.jpg"))))
+        except OSError:
+            _BOT_BANNER_VER = "0"
+    return f"{base}/tg/bot-banner.jpg?v={_BOT_BANNER_VER}"
+
+
 async def _send_open_app(
     message: "Message", lang: str, caption_key: str = "done", caption: str | None = None,
 ) -> None:
@@ -211,7 +227,7 @@ async def _send_open_app(
     kb = InlineKeyboardMarkup(inline_keyboard=[[
         InlineKeyboardButton(text=L["open_app"], web_app=WebAppInfo(url=url)),
     ]])
-    banner = (settings.FRONTEND_URL or "").rstrip("/") + "/tg/bot-banner.jpg"
+    banner = _bot_banner_url((settings.FRONTEND_URL or "").rstrip("/"))
     try:
         await message.answer_photo(photo=banner, caption=text, reply_markup=kb)
     except Exception as e:  # noqa: BLE001 — rasm yetib bormasa matnga tushamiz

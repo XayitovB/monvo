@@ -14,6 +14,8 @@ uvicorn worker'da ishlaydi.
 Endpoints:
   POST /merchant-bot/webhook   — Telegram update qabul qilish
 """
+import os
+
 import httpx
 from fastapi import APIRouter, Depends, Header, Request
 from fastapi.responses import Response
@@ -32,9 +34,21 @@ def _webapp_url() -> str:
     return f"{base}/m/"
 
 
+_BANNER_VER: str | None = None
+
+
 def _banner_url() -> str:
+    # Telegram rasmni URL bo'yicha keshlaydi — fayl o'zgarsa ham eski versiyani
+    # ko'rsataveradi. `?v=<mtime>` bilan har banner yangilanganda Telegram'ni
+    # majburan qayta yuklashga majbur qilamiz.
+    global _BANNER_VER
+    if _BANNER_VER is None:
+        try:
+            _BANNER_VER = str(int(os.path.getmtime(os.path.join("landing", "branding", "merchant-bot-banner.png"))))
+        except OSError:
+            _BANNER_VER = "0"
     base = (settings.FRONTEND_URL or "https://monvo.uz").rstrip("/")
-    return f"{base}/branding/merchant-bot-banner.png"
+    return f"{base}/branding/merchant-bot-banner.png?v={_BANNER_VER}"
 
 
 def _reply_parts(lang: str) -> tuple[str, dict]:
