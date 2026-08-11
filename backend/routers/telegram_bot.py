@@ -395,8 +395,12 @@ async def _handle_phone(message: Message, state: FSMContext, raw_phone: str):
 
     await state.update_data(phone=phone)
     await state.set_state(Onboard.code)
+    text = L["code_sent"].format(phone=phone)
+    from core.sms import is_configured as _eskiz_is_configured
+    if not _eskiz_is_configured():
+        text += f"\n\n🧪 SMS hali ulanmagan — test kodi: {code}"
     await message.answer(
-        L["code_sent"].format(phone=phone),
+        text,
         reply_markup=ReplyKeyboardRemove(),
     )
 

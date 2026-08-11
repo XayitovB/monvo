@@ -60,6 +60,12 @@ def _is_configured() -> bool:
     return bool(getattr(settings, "ESKIZ_EMAIL", "") and getattr(settings, "ESKIZ_PASSWORD", ""))
 
 
+def is_configured() -> bool:
+    """Eskiz ulanganmi — chaqiruvchilar OTP kodini chatda ko'rsatish-ko'rsatmaslikni
+    shunga qarab hal qiladi (Eskiz yo'q bo'lsa kod baribir doim "123456")."""
+    return _is_configured()
+
+
 def generate_otp_code(length: int = 6) -> str:
     """Tasdiqlash kodi yaratadi.
 
