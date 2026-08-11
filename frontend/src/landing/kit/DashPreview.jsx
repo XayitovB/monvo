@@ -25,7 +25,7 @@ export default function DashPreview({ compact = false, T }) {
         padding: compact ? 14 : 20, borderRight: '1px solid var(--k-line)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 22 }}>
-          <img src="/branding/monvo-logo-green.webp" alt="Monvo" style={{ height: 22, width: 'auto', display: 'block' }}/>
+          <img src="/branding/monvo-logo-green.webp?v=2" alt="Monvo" style={{ height: 22, width: 'auto', display: 'block' }}/>
         </div>
         {navItems.map((it, i) => (
           <div key={i} style={{

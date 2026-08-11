@@ -129,7 +129,7 @@ export default function AdminLayout({ children }) {
       <aside className={`al-sidebar ${sideOpen ? 'open' : ''}`}>
         <div className="al-brand">
           <img
-            src="/branding/monvo-logo-green.png"
+            src="/branding/monvo-logo-green.png?v=2"
             alt="Monvo"
             style={{ height: 28, objectFit: 'contain' }}
           />

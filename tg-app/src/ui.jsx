@@ -213,7 +213,7 @@ export function ErrorState({ message, onRetry, retryLabel = 'Retry' }) {
 export function Logo({ height = 28, white }) {
   const t = useTheme()
   const useWhite = white ?? t.isDark
-  const src = `${import.meta.env.BASE_URL}branding/monvo-logo-${useWhite ? 'white' : 'green'}.png`
+  const src = `${import.meta.env.BASE_URL}branding/monvo-logo-${useWhite ? 'white' : 'green'}.png?v=2`
   return <img src={src} alt="Monvo" style={{ height, width: 'auto', objectFit: 'contain', display: 'block' }} />
 }
 

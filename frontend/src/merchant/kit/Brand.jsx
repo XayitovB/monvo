@@ -4,7 +4,7 @@ import React from 'react';
 // mono=false → yashil logo (yon panel, onboarding)
 export const MonvoLogo = ({ size = 22, mono = false }) => (
   <img
-    src={mono ? '/branding/monvo-logo-white.png' : '/branding/monvo-logo-green.png'}
+    src={mono ? '/branding/monvo-logo-white.png?v=2' : '/branding/monvo-logo-green.png?v=2'}
     alt="Monvo"
     style={{ height: size * 1.4, width: 'auto', display: 'block' }}
   />

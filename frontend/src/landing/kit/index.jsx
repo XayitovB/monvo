@@ -13,14 +13,14 @@ export { KIcon };
 export const MonvoMark = ({ size = 28, light = false }) => (
   <span style={{ display: 'inline-flex', lineHeight: 0, flexShrink: 0 }}>
     {light ? (
-      <img src="/branding/monvo-logo-white.webp" alt="Monvo"
+      <img src="/branding/monvo-logo-white.webp?v=2" alt="Monvo"
         style={{ height: size, width: 'auto', display: 'block' }}/>
     ) : (
       <>
-        <img src="/branding/monvo-logo-dark.webp" alt="Monvo"
+        <img src="/branding/monvo-logo-dark.webp?v=2" alt="Monvo"
           className="k-logo-on-light"
           style={{ height: size, width: 'auto', display: 'block' }}/>
-        <img src="/branding/monvo-logo-white.webp" alt=""
+        <img src="/branding/monvo-logo-white.webp?v=2" alt=""
           aria-hidden className="k-logo-on-dark"
           style={{ height: size, width: 'auto', display: 'none' }}/>
       </>
@@ -32,7 +32,7 @@ export const MonvoLogo = ({ size = 28, light = false, green = false }) => {
   if (green) {
     return (
       <span style={{ display: 'inline-flex', lineHeight: 0, flexShrink: 0 }}>
-        <img src="/branding/monvo-logo-green.webp" alt="Monvo"
+        <img src="/branding/monvo-logo-green.webp?v=2" alt="Monvo"
           style={{ height: size, width: 'auto', display: 'block' }}/>
       </span>
     );
@@ -40,14 +40,14 @@ export const MonvoLogo = ({ size = 28, light = false, green = false }) => {
   return (
     <span style={{ display: 'inline-flex', lineHeight: 0, flexShrink: 0 }}>
       {light ? (
-        <img src="/branding/monvo-logo-white.webp" alt="Monvo"
+        <img src="/branding/monvo-logo-white.webp?v=2" alt="Monvo"
           style={{ height: size, width: 'auto', display: 'block' }}/>
       ) : (
         <>
-          <img src="/branding/monvo-logo-dark.webp" alt="Monvo"
+          <img src="/branding/monvo-logo-dark.webp?v=2" alt="Monvo"
             className="k-logo-on-light"
             style={{ height: size, width: 'auto', display: 'block' }}/>
-          <img src="/branding/monvo-logo-white.webp" alt=""
+          <img src="/branding/monvo-logo-white.webp?v=2" alt=""
             aria-hidden className="k-logo-on-dark"
             style={{ height: size, width: 'auto', display: 'none' }}/>
         </>
