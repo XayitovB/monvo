@@ -1,0 +1,227 @@
+###############################################################################
+#  Monvo — Production Stack (8 vCPU, 24 GB RAM uchun moslashtirilgan)
+#  Ishga tushirish: docker compose up -d
+###############################################################################
+#
+#  Xizmatlar:
+#    nginx       — Load Balancer + HTTPS (80/443)
+#    app         — FastAPI (6 worker, 4 GB RAM, 4 CPU)
+#    redis       — Cache + Rate Limit (2 GB)
+#    postgres    — DB (6 GB shared_buffers, tuning bilan)
+#    pgbouncer   — Connection Pooler (hozir chetda)
+#
+#  Resurs taqsimoti (24 GB RAM dan):
+#    postgres   ≈ 8 GB     (shared_buffers + cache)
+#    app        ≈ 4 GB
+#    redis      ≈ 2 GB
+#    nginx      ≈ 200 MB
+#    pgbouncer  ≈ 100 MB
+#    OS reserve ≈ 9 GB     (boshqa jarayonlar uchun)
+#
+###############################################################################
+
+services:
+
+  # ════════════════════════════════════════════════════════════════
+  # NGINX — Load Balancer + HTTPS
+  # ════════════════════════════════════════════════════════════════
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: monvo_nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./deploy/nginx/ssl:/etc/nginx/ssl:ro
+      - nginx_logs:/var/log/nginx
+    depends_on:
+      - app
+    networks:
+      - monvo_net
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 256M
+
+  # ════════════════════════════════════════════════════════════════
+  # FASTAPI APP — 6 worker (8 vCPU ning 75%)
+  # ════════════════════════════════════════════════════════════════
+  app:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    restart: always
+    env_file: .env
+    environment:
+      - APP_ENV=production
+      - WORKERS=6                  # start.sh ishlatadi
+      - LOG_LEVEL_UVICORN=warning
+    volumes:
+      - app_tmp:/tmp
+      - app_media:/app/media   # yuklangan rasmlar (push banner) — redeploy'da saqlanadi
+      - ./firebase-adminsdk.json:/app/firebase-adminsdk.json:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - monvo_net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: '4.0'
+          memory: 4G
+        reservations:
+          cpus: '1.0'
+          memory: 1G
+
+  # ════════════════════════════════════════════════════════════════
+  # REDIS — Cache (2 GB)
+  # ════════════════════════════════════════════════════════════════
+  redis:
+    image: redis:7.2-alpine
+    container_name: monvo_redis
+    restart: always
+    command: >
+      redis-server
+      --maxmemory 2gb
+      --maxmemory-policy allkeys-lru
+      --save 900 1
+      --save 300 10
+      --tcp-backlog 511
+      --tcp-keepalive 60
+      --requirepass ${REDIS_PASSWORD:-monvo_redis_2024}
+    volumes:
+      - redis_data:/data
+    networks:
+      - monvo_net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 2G
+
+  # ════════════════════════════════════════════════════════════════
+  # POSTGRESQL — Performance tuning (24 GB RAM uchun)
+  # ════════════════════════════════════════════════════════════════
+  postgres:
+    image: postgres:16-alpine
+    container_name: monvo_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-monvo}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme_in_production}
+    # Performance tuning — pgtune kalkulyatori bo'yicha (web-mixed, 24GB, 8 CPU, NVMe)
+    command:
+      - "postgres"
+      - "-c"
+      - "shared_buffers=6GB"
+      - "-c"
+      - "effective_cache_size=16GB"
+      - "-c"
+      - "maintenance_work_mem=1GB"
+      - "-c"
+      - "work_mem=32MB"
+      - "-c"
+      - "wal_buffers=16MB"
+      - "-c"
+      - "max_connections=200"
+      - "-c"
+      - "random_page_cost=1.1"           # NVMe uchun
+      - "-c"
+      - "effective_io_concurrency=200"   # NVMe uchun
+      - "-c"
+      - "checkpoint_completion_target=0.9"
+      - "-c"
+      - "default_statistics_target=100"
+      - "-c"
+      - "max_worker_processes=8"
+      - "-c"
+      - "max_parallel_workers=8"
+      - "-c"
+      - "max_parallel_workers_per_gather=4"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./deploy/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - monvo_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '4.0'
+          memory: 10G
+        reservations:
+          cpus: '1.0'
+          memory: 6G
+
+  # ════════════════════════════════════════════════════════════════
+  # PGBOUNCER — Connection Pooler (hozir chetda — auth muammosi)
+  # ════════════════════════════════════════════════════════════════
+  pgbouncer:
+    image: edoburu/pgbouncer:latest
+    container_name: monvo_pgbouncer
+    restart: always
+    environment:
+      DB_USER: ${POSTGRES_USER:-postgres}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-changeme_in_production}
+      DB_HOST: postgres
+      DB_NAME: ${POSTGRES_DB:-monvo}
+      POOL_MODE: transaction
+      MAX_CLIENT_CONN: "2000"
+      DEFAULT_POOL_SIZE: "50"
+      MIN_POOL_SIZE: "10"
+      RESERVE_POOL_SIZE: "20"
+      SERVER_RESET_QUERY: "DISCARD ALL"
+      AUTH_TYPE: scram-sha-256
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - monvo_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h localhost -p 5432"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+
+volumes:
+  postgres_data:
+  redis_data:
+  nginx_logs:
+  app_tmp:
+  app_media:
+
+networks:
+  monvo_net:
+    driver: bridge

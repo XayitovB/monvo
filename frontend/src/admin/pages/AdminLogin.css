@@ -1,0 +1,187 @@
+/* Monvo admin sign-in — shared visual with merchant + user app
+   Pattern: dark hero on top + light form body, mobile-mockup style */
+
+.al-login-bg {
+  min-height: 100vh;
+  background: var(--a-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.al-login-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.18;
+  pointer-events: none;
+}
+
+.al-login-orb-1 {
+  width: 460px; height: 460px;
+  background: radial-gradient(circle, #2F6B3F, transparent 70%);
+  top: -160px; right: -120px;
+}
+
+.al-login-orb-2 {
+  width: 320px; height: 320px;
+  background: radial-gradient(circle, #1F4A2A, transparent 70%);
+  bottom: -100px; left: -80px;
+}
+
+.al-login-card {
+  width: 100%;
+  max-width: 460px;
+  position: relative;
+  z-index: 1;
+  background: var(--a-card);
+  border: 1px solid var(--a-border);
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 30px 60px -20px rgba(0,0,0,0.4);
+  display: flex;
+  flex-direction: column;
+}
+
+.al-hero {
+  background: #0E0F0C;
+  color: #fff;
+  padding: 32px 28px 28px;
+  border-bottom-left-radius: 24px;
+  border-bottom-right-radius: 24px;
+}
+
+.al-hero-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.al-hero-icon {
+  width: 36px;
+  height: 36px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+
+.al-hero-brand {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  color: rgba(255,255,255,0.85);
+  text-transform: uppercase;
+}
+
+.al-hero-title {
+  margin-top: 26px;
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 28px;
+  font-weight: 500;
+  font-style: italic;
+  letter-spacing: -0.6px;
+  line-height: 1.1;
+}
+
+.al-hero-sub {
+  margin-top: 12px;
+  font-size: 13.5px;
+  color: rgba(255,255,255,0.7);
+  line-height: 1.55;
+}
+
+.al-form-body {
+  padding: 28px 28px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.al-login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.al-field label {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--a-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 8px;
+}
+
+.al-input-wrap {
+  position: relative;
+}
+
+.al-input-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--a-dim);
+  pointer-events: none;
+}
+
+.al-padded {
+  padding-left: 38px !important;
+  border-radius: 12px !important;
+}
+
+.al-eye {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--a-dim);
+  padding: 4px;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.al-eye:hover { color: var(--a-text); }
+
+.al-error {
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.25);
+  color: var(--a-red);
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+}
+
+.al-submit {
+  width: 100%;
+  justify-content: center;
+  padding: 13px;
+  font-size: 14px;
+  background: #2F6B3F !important;
+  border-color: #2F6B3F !important;
+}
+
+.al-submit:hover:not(:disabled) {
+  background: #1F4A2A !important;
+  border-color: #1F4A2A !important;
+}
+
+.al-footnote {
+  margin-top: 4px;
+  padding: 14px;
+  background: var(--a-bg);
+  border-radius: 12px;
+  font-size: 12px;
+  color: var(--a-muted);
+  text-align: center;
+  line-height: 1.55;
+}

@@ -1,0 +1,64 @@
+# Secrets
+.env
+*.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+env/
+
+# Logs
+*.log
+logs/
+
+# Firebase
+firebase-adminsdk*.json
+*-service-account.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+.claude/
+
+# Flutter mobile app (not deployed to Railway)
+mobile/
+
+# Telegram bot — alohida repo
+tgbot/
+
+# Finance AI — separate Flutter project
+finance_ai/
+
+# Flutter / Dart
+.dart_tool/
+build/
+*.g.dart
+
+# Frontend build artifacts
+frontend/node_modules
+frontend/dist
+
+# Telegram mini-app build artifacts
+tg-app/node_modules
+tg-app/dist
+
+# Stale local Flutter web build (not part of the Dockerfile build — accidental
+# commit leaked a Mapbox secret token in main.dart.js, e027cb… history purged)
+backend/merchant-app/
+
+# APK build artifacts
+*.apk

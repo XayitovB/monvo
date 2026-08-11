@@ -1,0 +1,108 @@
+###############################################################################
+#  Monvo — Shared-server deploy (169.58.50.8: 7.8GB RAM / 4 CPU, ko'p tenant)
+#  Bu fayl asosiy docker-compose.yml'dan farqli — kichik resurs profili,
+#  o'z nginx'i yo'q (mavjud kardly_nginx umumiy ingress sifatida ishlatiladi,
+#  edge_net orqali), pgbouncer yo'q (hozircha shart emas).
+#
+#  MUHIM: har doim -p monvo bilan ishga tushirish kerak — aks holda Compose
+#  loyiha nomini joriy papka nomidan oladi ("backend"), va bu /opt/kardly/backend
+#  bilan TO'QNASHADI (ikkalasi ham "backend" papkasida joylashgan)!
+#
+#  Ishga tushirish:
+#    docker compose -p monvo -f docker-compose.shared-server.yml --env-file .env up -d
+###############################################################################
+
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    container_name: monvo_backend
+    restart: always
+    env_file: .env
+    environment:
+      - APP_ENV=production
+      - WORKERS=2
+      - LOG_LEVEL_UVICORN=warning
+    volumes:
+      - monvo_app_tmp:/tmp
+      - monvo_app_media:/app/media
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - monvo_net
+      - edge_net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 768M
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: monvo_redis
+    restart: always
+    command: >
+      redis-server
+      --maxmemory 96mb
+      --maxmemory-policy allkeys-lru
+      --save 900 1
+      --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - monvo_redis_data:/data
+    networks:
+      - monvo_net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '0.3'
+          memory: 128M
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: monvo_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-monvo}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - monvo_postgres_data:/var/lib/postgresql/data
+    networks:
+      - monvo_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 768M
+
+volumes:
+  monvo_postgres_data:
+  monvo_redis_data:
+  monvo_app_tmp:
+  monvo_app_media:
+
+networks:
+  monvo_net:
+    driver: bridge
+  edge_net:
+    external: true

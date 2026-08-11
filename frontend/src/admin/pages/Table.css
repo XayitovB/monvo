@@ -1,0 +1,28 @@
+.a-search-wrap {
+  position: relative;
+}
+.a-search-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--a-dim);
+  pointer-events: none;
+}
+.a-search-input {
+  width: 220px;
+  padding-left: 32px !important;
+}
+
+.td-dim   { color: var(--a-dim); font-size: 12px; }
+.td-bold  { color: var(--a-text); font-weight: 600; }
+.td-actions {
+  display: flex;
+  gap: 6px;
+}
+.td-icon-btn {
+  width: 30px;
+  height: 30px;
+  padding: 0 !important;
+  justify-content: center;
+}

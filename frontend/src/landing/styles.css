@@ -1,0 +1,204 @@
+/* Monvo landing — design tokens */
+/* Fontlar self-hosted (Fontsource) — LandingApp.jsx'da import qilinadi.
+   Render-blocking Google Fonts @import zanjiri olib tashlandi. */
+
+:root {
+  --k-font: 'Geist Variable', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --k-display: 'Fraunces Variable', 'Times New Roman', Georgia, serif;
+
+  --k-bg: #FAFAF7;
+  --k-surface: #FFFFFF;
+  --k-surface-alt: #F4F2EE;
+  --k-ink: #0F1115;
+  --k-ink-soft: #3A3F47;
+  --k-ink-mute: #6B7280;
+  --k-line: #E8E5DE;
+  --k-line-strong: #C9C5BA;
+  --k-brand: #2F6B3F;
+  --k-brand-deep: #1F4A2A;
+  --k-brand-soft: #E8F1EA;
+}
+
+html.dark {
+  --k-bg: #0F1115;
+  --k-surface: #1A1E26;
+  --k-surface-alt: #232833;
+  --k-ink: #F5F4EE;
+  --k-ink-soft: #D6DAE3;
+  --k-ink-mute: #9098A5;
+  --k-line: #2E3440;
+  --k-line-strong: #424857;
+  --k-brand: #5FB773;
+  --k-brand-deep: #8AD79B;
+  --k-brand-soft: rgba(95, 183, 115, 0.18);
+}
+
+html.dark .k-logo-on-light { display: none !important; }
+html.dark .k-logo-on-dark  { display: block !important; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--k-bg);
+  color: var(--k-ink);
+  overflow-x: hidden;
+}
+
+.k-root,
+.k-root * {
+  box-sizing: border-box;
+}
+
+.k-root {
+  font-family: var(--k-font);
+  background: var(--k-bg);
+  color: var(--k-ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'ss01', 'cv11';
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.k-root .container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+.k-root ::selection {
+  background: var(--k-brand);
+  color: #fff;
+}
+
+@keyframes monvo-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+@keyframes monvo-bob {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  50% { transform: translateY(-8px) rotate(-1deg); }
+}
+
+/* ──────────────────────────────────────────────────────────
+   RESPONSIVE — class hooks override inline grid templates
+   ────────────────────────────────────────────────────────── */
+
+/* Tablet (≤ 1024px) */
+@media (max-width: 1024px) {
+  .k-root .container { padding: 0 24px !important; }
+  .k-grid-feat   { grid-template-columns: repeat(2, 1fr) !important; }
+  .k-grid-how    { grid-template-columns: repeat(2, 1fr) !important; gap: 14px !important; }
+  .k-grid-stats  { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+  .k-grid-reviews{ grid-template-columns: repeat(2, 1fr) !important; }
+  .k-grid-logos  { grid-template-columns: repeat(4, 1fr) !important; gap: 24px !important; }
+  .k-grid-pricing{ grid-template-columns: 1fr !important; max-width: 520px; margin-left: auto; margin-right: auto; }
+  .k-grid-footer { grid-template-columns: 1.4fr 1fr 1fr !important; gap: 32px !important; }
+  .k-grid-hero,
+  .k-grid-dash,
+  .k-grid-app,
+  .k-grid-case,
+  .k-grid-faq,
+  .k-grid-app-dl { grid-template-columns: 1fr !important; gap: 48px !important; }
+  .k-grid-demo   { grid-template-columns: 1fr !important; }
+}
+
+/* Mobile (≤ 720px) */
+@media (max-width: 720px) {
+  .k-root .container { padding: 0 18px !important; }
+
+  /* Stack everything */
+  .k-grid-hero,
+  .k-grid-dash,
+  .k-grid-app,
+  .k-grid-case,
+  .k-grid-faq,
+  .k-grid-demo,
+  .k-grid-app-dl,
+  .k-grid-feat,
+  .k-grid-how,
+  .k-grid-pricing,
+  .k-grid-reviews,
+  .k-grid-case-metrics {
+    grid-template-columns: 1fr !important;
+    gap: 18px !important;
+  }
+  .k-grid-stats  { grid-template-columns: repeat(2, 1fr) !important; gap: 4px !important; }
+  .k-grid-logos  { grid-template-columns: repeat(3, 1fr) !important; gap: 18px !important; }
+  .k-grid-footer { grid-template-columns: 1fr 1fr !important; gap: 28px !important; margin-bottom: 32px !important; }
+
+  /* Section padding shrink */
+  .k-root section { padding-top: 64px !important; padding-bottom: 64px !important; }
+  .k-root section#top { padding-top: 110px !important; padding-bottom: 56px !important; }
+
+  /* Nav: hide anchor links + login button on mobile (CTA stays) */
+  .k-nav-anchors,
+  .k-nav-theme,
+  .k-nav-login { display: none !important; }
+  .k-nav-row { gap: 10px !important; }
+
+  /* Hero: hide floating decoration pills (they're absolute-positioned chaos on small screens) */
+  .k-hero-art { min-height: 320px !important; }
+  .k-hero-pill,
+  .k-hero-stat-card { display: none !important; }
+
+  /* Stats: turn into 2x2 with internal borders */
+  .k-grid-stats > div { border-left: none !important; padding: 18px 14px !important; }
+  .k-grid-stats > div:nth-child(2) { border-left: 1px solid var(--k-line) !important; }
+  .k-grid-stats > div:nth-child(4) { border-left: 1px solid var(--k-line) !important; }
+  .k-grid-stats > div:nth-child(3),
+  .k-grid-stats > div:nth-child(4) { border-top: 1px solid var(--k-line) !important; }
+
+  /* Features: stacked, fix borders */
+  .k-grid-feat > div {
+    border-right: none !important;
+    border-bottom: 1px solid var(--k-line) !important;
+  }
+  .k-grid-feat > div:last-child { border-bottom: none !important; }
+
+  /* Reviews: stacked */
+  .k-grid-reviews > div { padding: 22px !important; }
+
+  /* Pricing: stacked */
+  .k-grid-pricing { max-width: 100% !important; }
+  .k-grid-pricing > div { padding: 26px !important; }
+
+  /* Demo: shrink padding on both panes */
+  .k-demo-pane { padding: 32px 24px !important; }
+  .k-demo-card { border-radius: 18px !important; }
+
+  /* App download: shrink padding, hide decorative phone (too cramped) */
+  .k-app-dl-card { padding: 32px 24px !important; }
+  .k-app-dl-phone { display: none !important; }
+
+  /* AppPreview second phone (overlapped, overflows on mobile) */
+  .k-phone-b { display: none !important; }
+  .k-phone-stack { justify-content: center !important; }
+
+  /* CaseStudy metric squares: smaller */
+  .k-grid-case-metrics > div { aspect-ratio: auto !important; padding: 22px !important; }
+  .k-grid-case-metrics > div > div:first-child { font-size: 40px !important; }
+
+  /* FAQ sticky disabled when stacked */
+  .k-faq-side { position: static !important; }
+
+  /* Pricing badge inside card on mobile */
+  .k-pricing-card { overflow: visible; }
+
+  /* Footer: brand column spans both */
+  .k-grid-footer > div:first-child { grid-column: 1 / -1; }
+  .k-footer-bottom {
+    flex-direction: column !important;
+    gap: 16px !important;
+    text-align: center !important;
+    align-items: center !important;
+  }
+}
+
+/* Very small phones (≤ 380px) */
+@media (max-width: 380px) {
+  .k-grid-logos { grid-template-columns: repeat(2, 1fr) !important; }
+  .k-grid-stats { grid-template-columns: 1fr !important; }
+  .k-grid-stats > div { border-left: none !important; border-top: 1px solid var(--k-line) !important; }
+  .k-grid-stats > div:first-child { border-top: none !important; }
+}

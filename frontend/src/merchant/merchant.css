@@ -1,0 +1,111 @@
+/* =====================================================================
+   Monvo Business — merchant panel theme tokens
+   Scope: anything inside .merchant-root
+   ===================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&family=Fraunces:opsz,wght,ital@9..144,400..600,1&display=swap');
+
+.merchant-root {
+  --m-sans: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --m-mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  --m-display: 'Fraunces', 'Times New Roman', Georgia, serif;
+
+  /* Surfaces (light) — aligned with Monvo mobile mockup */
+  --m-bg:          #FAFAF7;
+  --m-surface:     #FFFFFF;
+  --m-surface-alt: #F4F2EE;
+  --m-raised:      #FFFFFF;
+  --m-paper:       #FFFFFF;  /* modal/popover yuzasi — --m-surface bilan bir xil */
+  --m-paper-alt:   #F4F2EE;  /* jadval sarlavhasi foni — --m-surface-alt aliasi */
+
+  /* Ink */
+  --m-ink:        #0F1115;
+  --m-ink-soft:   #3A3F47;
+  --m-ink-mute:   #6B7280;
+  --m-ink-faint:  #9CA3AF;
+
+  /* Lines */
+  --m-line:        #E8E5DE;
+  --m-line-strong: #C9C5BA;
+  --m-border:      #E8E5DE;  /* --m-line aliasi */
+
+  /* Brand — Monvo forest green (matches landing + Flutter app + mockup) */
+  --m-brand:      #2F6B3F;
+  --m-brand-deep: #1F4A2A;
+  --m-brand-soft: #E8F1EA;
+  --m-brand-ink:  #1F4A2A;
+
+  /* Semantic */
+  --m-good:      #15803D;
+  --m-warn:      #B45309;
+  --m-bad:       #B91C1C;
+  --m-good-soft: #DCFCE7;
+  --m-warn-soft: #FEF3C7;
+  --m-bad-soft:  #FEE2E2;
+
+  font-family: var(--m-sans);
+  background: var(--m-bg);
+  color: var(--m-ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'cv11', 'ss01';
+  min-height: 100vh;
+}
+
+.merchant-root[data-theme='dark'] {
+  --m-bg:          #0E1014;
+  --m-surface:     #161A22;
+  --m-surface-alt: #1E232D;
+  --m-raised:      #1E232D;
+  --m-paper:       #1E232D;  /* modal/popover yuzasi (dark) */
+  --m-paper-alt:   #1E232D;
+  --m-ink:         #F2F4F7;
+  --m-ink-soft:    #C9CDD6;
+  --m-ink-mute:    #8C92A0;
+  --m-ink-faint:   #5C6270;
+  --m-line:        #262C36;
+  --m-line-strong: #353C48;
+  --m-border:      #262C36;
+  --m-brand-soft:  #1B2C44;
+  --m-good-soft:   #14321E;
+  --m-warn-soft:   #2E2410;
+  --m-bad-soft:    #2E1414;
+}
+
+.merchant-root *,
+.merchant-root *::before,
+.merchant-root *::after {
+  box-sizing: border-box;
+}
+
+.merchant-root button,
+.merchant-root input,
+.merchant-root textarea,
+.merchant-root select {
+  font-family: inherit;
+}
+
+.merchant-root input:focus,
+.merchant-root textarea:focus,
+.merchant-root select:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.merchant-root ::-webkit-scrollbar { width: 10px; height: 10px; }
+.merchant-root ::-webkit-scrollbar-thumb { background: var(--m-line-strong); border-radius: 8px; }
+.merchant-root ::-webkit-scrollbar-track { background: transparent; }
+
+@keyframes m-blink { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+/* ── Mobil / Telegram Mini App moslashuvi ──────────────────────────────────
+   Tor ekranda kontent gorizontal toshmasligi uchun: ko'p ustunli grid'lar
+   bitta ustunga tushadi va asosiy kontent padding'i kichrayadi. Inline
+   stillarni bosish uchun !important kerak. */
+.merchant-root, .merchant-root body { overflow-x: hidden; }
+
+@media (max-width: 860px) {
+  .merchant-root main [style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important;
+  }
+}

@@ -1,0 +1,303 @@
+.al-root {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ── Sidebar ─────────────────────────────────────────────────────────────── */
+.al-sidebar {
+  width: var(--a-sidebar-w);
+  background: var(--a-sidebar);
+  border-right: 1px solid var(--a-border);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 200;
+  transition: transform 0.25s ease;
+}
+
+.al-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 16px;
+  border-bottom: 1px solid var(--a-border);
+}
+
+.al-brand-name {
+  font-weight: 800;
+  font-size: 17px;
+  color: var(--a-text);
+  letter-spacing: -0.02em;
+}
+
+.al-brand-tag {
+  margin-left: auto;
+  background: rgba(47,107,63,0.18);
+  color: var(--a-primary-light);
+  padding: 3px 9px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.al-nav {
+  flex: 1;
+  padding: 8px 10px 12px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.al-nav-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 4px 0;
+}
+
+.al-nav-section-title {
+  padding: 12px 12px 6px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--a-dim);
+}
+
+.al-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--a-muted);
+  transition: background .15s, color .15s;
+}
+
+.al-nav-item:hover {
+  background: var(--a-nav-hover);
+  color: var(--a-text);
+}
+
+.al-nav-item.active {
+  background: rgba(47,107,63,0.16);
+  color: var(--a-primary-light);
+}
+
+.al-nav-item.active::before {
+  content: '';
+  position: absolute;
+  margin-left: -14px;
+  width: 3px;
+  height: 18px;
+  border-radius: 2px;
+  background: var(--a-primary-light);
+}
+
+.al-nav-item {
+  position: relative;
+}
+
+.al-nav-icon { flex-shrink: 0; display: inline-flex; }
+
+/* ── Admin profile (sidebar pasti) ────────────────────────────────────── */
+.al-profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-top: 1px solid var(--a-border);
+  background: var(--a-profile-bg);
+}
+
+.al-profile-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--a-gradient);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.al-profile-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.al-profile-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--a-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.al-profile-role {
+  font-size: 11px;
+  color: var(--a-muted);
+  text-transform: capitalize;
+}
+
+.al-profile-logout {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid var(--a-border);
+  color: var(--a-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+.al-profile-logout:hover {
+  color: var(--a-red);
+  border-color: rgba(239,68,68,0.3);
+  background: rgba(239,68,68,0.08);
+}
+
+/* ── Main ─────────────────────────────────────────────────────────────── */
+.al-main {
+  flex: 1;
+  min-width: 0; /* flex bola nowrap kontentdan cho'zilib ketmasligi uchun */
+  margin-left: var(--a-sidebar-w);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.al-topbar {
+  height: 56px;
+  border-bottom: 1px solid var(--a-border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 24px;
+  background: var(--a-topbar-bg);
+  backdrop-filter: saturate(160%) blur(12px);
+  -webkit-backdrop-filter: saturate(160%) blur(12px);
+}
+
+.al-burger {
+  display: none;
+  background: none;
+  color: var(--a-text);
+  padding: 4px;
+}
+
+.al-topbar-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(63,156,92,0.12);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  color: var(--a-green);
+}
+.al-status-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--a-green);
+  box-shadow: 0 0 0 0 rgba(63,156,92,0.6);
+  animation: al-pulse 1.8s infinite;
+}
+@keyframes al-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(63,156,92,0.55); }
+  70%  { box-shadow: 0 0 0 8px rgba(63,156,92,0); }
+  100% { box-shadow: 0 0 0 0 rgba(63,156,92,0); }
+}
+.al-status-text { line-height: 1; }
+
+.al-topbar-version {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: var(--a-surface-2, rgba(127,127,127,0.10));
+  border: 1px solid var(--a-border, rgba(127,127,127,0.18));
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  color: var(--a-text-soft, #8a8a8a);
+  font-variant-numeric: tabular-nums;
+}
+
+.al-topbar-spacer { flex: 1; }
+
+.al-topbar-admin {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  font-size: 12.5px;
+}
+.al-topbar-admin-name {
+  font-weight: 600;
+  color: var(--a-text);
+}
+.al-topbar-admin-role {
+  font-size: 11.5px;
+  color: var(--a-muted);
+  text-transform: capitalize;
+}
+
+.al-theme {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid var(--a-border);
+  background: transparent;
+  color: var(--a-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.al-theme:hover {
+  color: var(--a-text);
+  border-color: var(--a-border);
+  background: var(--a-card2);
+}
+
+.al-content {
+  flex: 1;
+  min-width: 0; /* ichki keng (nowrap) kontent ekrandan oshib ketmasligi uchun */
+  padding: 28px 24px;
+  max-width: 1280px;
+  width: 100%;
+}
+
+.al-overlay { display: none; }
+
+/* ── Mobile ───────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .al-sidebar { transform: translateX(-100%); }
+  .al-sidebar.open { transform: translateX(0); }
+  .al-main { margin-left: 0; }
+  .al-burger { display: flex; }
+  .al-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 199;
+    background: rgba(0,0,0,0.5);
+  }
+  .al-content { padding: 20px 16px; }
+  .al-topbar-admin { display: none; }
+}

@@ -1,0 +1,230 @@
+/* Variants editor (A/B test creator) */
+.vx-section {
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid var(--a-border, #E5E7EB);
+  border-radius: 12px;
+  background: var(--a-bg, transparent);
+}
+
+.vx-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.vx-title {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--a-text, inherit);
+}
+
+.vx-sub {
+  font-size: 11px;
+  color: var(--a-muted, #6b7280);
+  margin-top: 2px;
+}
+
+.vx-total {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+.vx-total.ok {
+  color: #047857;
+  background: rgba(16, 185, 129, 0.14);
+}
+.vx-total.bad {
+  color: #B45309;
+  background: rgba(245, 158, 11, 0.16);
+}
+
+.vx-bar {
+  display: flex;
+  height: 8px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.06);
+  margin-bottom: 14px;
+}
+.vx-bar-seg {
+  transition: flex-basis 180ms ease;
+}
+.vx-bar-empty {
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(0, 0, 0, 0.05),
+    rgba(0, 0, 0, 0.05) 4px,
+    transparent 4px,
+    transparent 8px
+  );
+}
+
+.vx-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.vx-row {
+  display: grid;
+  grid-template-columns: 28px 1fr minmax(180px, 220px) auto auto;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 10px;
+  border: 1px solid var(--a-border, #E5E7EB);
+  border-radius: 10px;
+  background: var(--a-bg2, #fff);
+}
+.vx-row.is-control {
+  background: rgba(212, 175, 55, 0.07);
+  border-color: rgba(212, 175, 55, 0.4);
+}
+
+.vx-dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.vx-name {
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--a-text, inherit);
+  padding: 4px 0;
+}
+
+.vx-weight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.vx-weight input[type="range"] {
+  flex: 1;
+  accent-color: var(--a-primary, #2F6B3F);
+}
+.vx-num {
+  width: 50px;
+  padding: 4px 6px;
+  border: 1px solid var(--a-border, #E5E7EB);
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: right;
+  background: var(--a-bg, #fff);
+  color: var(--a-text, inherit);
+}
+.vx-pct {
+  font-size: 11px;
+  color: var(--a-muted, #6b7280);
+  font-weight: 600;
+}
+
+.vx-control-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 9px;
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid var(--a-border, #E5E7EB);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--a-muted, #6b7280);
+  cursor: pointer;
+  transition: all 120ms ease;
+}
+.vx-control-btn:hover {
+  border-color: rgba(212, 175, 55, 0.5);
+  color: #B45309;
+}
+.vx-control-btn.on {
+  background: rgba(212, 175, 55, 0.16);
+  border-color: rgba(212, 175, 55, 0.5);
+  color: #B45309;
+}
+
+.vx-remove {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--a-muted, #9ca3af);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 120ms ease;
+}
+.vx-remove:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.1);
+  color: #DC2626;
+}
+.vx-remove:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.vx-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.vx-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid var(--a-border, #E5E7EB);
+  border-radius: 8px;
+  background: var(--a-bg2, #fff);
+  color: var(--a-text, inherit);
+  cursor: pointer;
+  transition: all 120ms ease;
+}
+.vx-btn:hover:not(:disabled) {
+  border-color: var(--a-primary, #2F6B3F);
+  background: rgba(47,107,63,0.04);
+}
+.vx-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.vx-btn-ghost {
+  background: transparent;
+  border-style: dashed;
+}
+
+@media (max-width: 640px) {
+  .vx-row {
+    grid-template-columns: 24px 1fr auto;
+    grid-template-areas:
+      "dot name remove"
+      "weight weight weight"
+      "control control control";
+  }
+  .vx-dot { grid-area: dot; }
+  .vx-name { grid-area: name; }
+  .vx-remove { grid-area: remove; }
+  .vx-weight { grid-area: weight; }
+  .vx-control-btn { grid-area: control; justify-self: start; }
+}
