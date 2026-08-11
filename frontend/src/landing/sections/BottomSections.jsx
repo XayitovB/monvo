@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { BRAND, BRAND_DEEP, BRAND_SOFT, KIcon, Btn, Tag, SectionHead, MonvoLogo } from '../kit/index.jsx';
-import { PhoneMockA, StoreBtn } from '../kit/PhoneMock.jsx';
+import { PhoneMockA, StoreBtn, TelegramBtn } from '../kit/PhoneMock.jsx';
 
 // ── Pricing ──────────────────────────────────────────────────────────────────
 export function Pricing({ T, onCta }) {
@@ -402,9 +402,10 @@ export function AppDownload({ T }) {
             <p style={{ fontSize: 16, lineHeight: 1.55, color: 'var(--k-brand-deep)', opacity: 0.85, margin: '0 0 28px', maxWidth: 460 }}>
               {T.sect_app_dl_sub}
             </p>
-            <div style={{ display: 'flex', gap: 10 }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
               <StoreBtn store="apple" soonLabel={T.store_soon}/>
               <StoreBtn store="google" soonLabel={T.store_soon}/>
+              <TelegramBtn openLabel={T.telegram_open}/>
             </div>
             <div style={{ display: 'flex', gap: 18, marginTop: 26 }}>
               {[['4.9', 'App Store'], ['4.8', 'Google Play'], ['3.2M', T.app_dl_cards]].map(([k, l], i) => (

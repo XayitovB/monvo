@@ -594,6 +594,7 @@ export const STRINGS = {
 
     app_dl_eyebrow: 'Клиентское приложение',
     store_soon: 'Скоро',
+    telegram_open: 'Открыть в',
     app_dl_cards: 'активных карт',
 
     dash_preview: {
@@ -1220,6 +1221,7 @@ export const STRINGS = {
 
     app_dl_eyebrow: 'Mijoz ilovasi',
     store_soon: 'Tez kunda',
+    telegram_open: 'Ochish',
     app_dl_cards: 'aktiv kartalar',
 
     dash_preview: {
@@ -1852,6 +1854,7 @@ export const STRINGS = {
 
     app_dl_eyebrow: 'Customer app',
     store_soon: 'Coming soon',
+    telegram_open: 'Open in',
     app_dl_cards: 'active cards',
 
     dash_preview: {

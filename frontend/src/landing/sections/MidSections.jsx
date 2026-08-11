@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { BRAND, BRAND_DEEP, BRAND_SOFT, KIcon, Btn, SectionHead } from '../kit/index.jsx';
 import DashPreview from '../kit/DashPreview.jsx';
-import { PhoneMockA, PhoneMockB, StoreBtn } from '../kit/PhoneMock.jsx';
+import { PhoneMockA, PhoneMockB, StoreBtn, TelegramBtn } from '../kit/PhoneMock.jsx';
 
 // ── Logo wall ────────────────────────────────────────────────────────────────
 // Admin paneldan boshqariladigan real biznes logolari (/landing-logos).
@@ -357,9 +357,10 @@ export function AppPreview({ T }) {
                 </div>
               ))}
             </div>
-            <div style={{ display: 'flex', gap: 10, marginTop: 32 }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 32 }}>
               <StoreBtn store="apple" soonLabel={T.store_soon}/>
               <StoreBtn store="google" soonLabel={T.store_soon}/>
+              <TelegramBtn openLabel={T.telegram_open}/>
             </div>
           </div>
         </div>
