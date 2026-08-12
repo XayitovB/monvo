@@ -123,6 +123,19 @@ export default function HeaderBar({ onMenuClick, showMenu = false }) {
         )}
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <button
+          onClick={() => navigate('/ai-assistant')}
+          title="AI yordamchi"
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            padding: '6px 12px', borderRadius: 999, border: 'none',
+            background: 'var(--m-brand)', color: '#fff',
+            fontSize: 12.5, fontWeight: 700, letterSpacing: 0.2,
+            cursor: 'pointer',
+          }}
+        >
+          <I.bot size={15}/> AI
+        </button>
         <LangSwitcher/>
         <div style={{ width: 1, height: 18, background: 'var(--m-line)', margin: '0 4px' }}/>
         <div ref={inboxRef} style={{ position: 'relative' }}>

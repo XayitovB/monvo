@@ -29,6 +29,10 @@ const EyeOffIcon = (p) => (
   </svg>
 );
 
+// Telegram bot orqali ochilganmi — shunda "sayt"ga o'xshamasligi uchun
+// marketing hero karta va tashqi ro'yxatdan o'tish havolasi olib tashlanadi.
+const isTelegramWebApp = typeof window !== 'undefined' && !!window.Telegram?.WebApp?.initData;
+
 export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -76,6 +80,122 @@ export default function Login() {
     } finally {
       setLoading(false);
     }
+  }
+
+  const formBlock = (
+    <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+      <Field label={t('login.username')} required>
+        <Input
+          icon={<UserIcon/>}
+          type="text"
+          placeholder={t('login.usernamePlaceholder')}
+          value={identifier}
+          onChange={(e) => setIdentifier(e.target.value)}
+          autoComplete="username"
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck="false"
+          autoFocus
+        />
+      </Field>
+
+      <Field label={t('login.password')} required>
+        <div style={{ position: 'relative' }}>
+          <Input
+            icon={<LockIcon/>}
+            type={showPw ? 'text' : 'password'}
+            placeholder={t('login.passwordPlaceholder')}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            autoComplete="current-password"
+          />
+          <button
+            type="button"
+            onClick={() => setShowPw((s) => !s)}
+            aria-label={showPw ? 'Hide password' : 'Show password'}
+            style={{
+              position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
+              background: 'transparent', border: 'none', cursor: 'pointer',
+              color: 'var(--m-ink-mute)', padding: 4, display: 'flex',
+            }}
+          >
+            {showPw ? <EyeOffIcon size={16}/> : <I.eye size={16}/>}
+          </button>
+        </div>
+      </Field>
+
+      {error && (
+        <div style={{
+          padding: '10px 12px', background: 'var(--m-bad-soft)',
+          color: 'var(--m-bad)', borderRadius: 9, fontSize: 12.5, lineHeight: 1.4,
+        }}>{error}</div>
+      )}
+
+      <Button
+        type="submit" variant="primary" size="lg" full
+        iconRight={loading ? null : <I.arrowR/>}
+        disabled={loading || !identifier || !password}
+        style={loading ? { opacity: 0.7, cursor: 'wait' } : undefined}
+      >
+        {loading ? t('login.signingIn') : t('login.signIn')}
+      </Button>
+
+      <div style={{ fontSize: 11.5, color: 'var(--m-ink-mute)', lineHeight: 1.5 }}>
+        {t('login.terms')}
+      </div>
+    </form>
+  );
+
+  const loginHintBlock = (loginHint?.admin || loginHint?.merchant) && (
+    <div style={{ marginTop: 4, fontSize: 11.5, opacity: 0.55, textAlign: 'center', lineHeight: 1.6 }}>
+      {loginHint.admin && <div>{loginHint.admin}</div>}
+      {loginHint.merchant && <div>{loginHint.merchant}</div>}
+    </div>
+  );
+
+  // ── Telegram Mini App: soddaroq, "ilova"ga o'xshash ko'rinish — marketing
+  // hero karta va tashqi (brauzerga chiqib ketadigan) ro'yxatdan o'tish
+  // havolasi yo'q, chunki merchant botga taklif qilingan biznes egasi bo'ladi.
+  if (isTelegramWebApp) {
+    return (
+      <div className="merchant-root">
+        <div style={{
+          minHeight: '100vh', background: 'var(--m-bg)',
+          display: 'flex', flexDirection: 'column',
+          padding: '20px 20px 32px',
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <div style={{ display: 'inline-flex', background: 'var(--m-surface-alt)', borderRadius: 7, padding: 2 }}>
+              {[{ id: 'uz', label: "O'z" }, { id: 'ru', label: 'RU' }].map((opt) => (
+                <button
+                  key={opt.id}
+                  onClick={() => setLang(opt.id)}
+                  style={{
+                    padding: '4px 12px', fontSize: 11.5, fontWeight: 600, letterSpacing: 0.4,
+                    background: lang === opt.id ? 'var(--m-surface)' : 'transparent',
+                    color: lang === opt.id ? 'var(--m-ink)' : 'var(--m-ink-mute)',
+                    border: 'none', borderRadius: 5, cursor: 'pointer',
+                  }}
+                >{opt.label}</button>
+              ))}
+            </div>
+          </div>
+
+          <div style={{
+            flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center',
+            width: '100%', maxWidth: 420, margin: '0 auto', gap: 24,
+          }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+              <MonvoLogo size={30}/>
+              <div style={{ ...T.h1, textAlign: 'center' }}>{t('login.title')}</div>
+              <div style={{ ...T.body, textAlign: 'center' }}>{t('login.subtitle')}</div>
+            </div>
+            {formBlock}
+            {loginHintBlock}
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -134,72 +254,12 @@ export default function Login() {
             padding: '28px 28px 32px',
             display: 'flex', flexDirection: 'column', gap: 16,
           }}>
-            <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-              <div>
-                <div style={{ ...T.h1, fontSize: 24 }}>{t('login.title')}</div>
-                <div style={{ ...T.body, marginTop: 4 }}>{t('login.subtitle')}</div>
-              </div>
+            <div>
+              <div style={{ ...T.h1, fontSize: 24 }}>{t('login.title')}</div>
+              <div style={{ ...T.body, marginTop: 4 }}>{t('login.subtitle')}</div>
+            </div>
 
-              <Field label={t('login.username')} required>
-                <Input
-                  icon={<UserIcon/>}
-                  type="text"
-                  placeholder={t('login.usernamePlaceholder')}
-                  value={identifier}
-                  onChange={(e) => setIdentifier(e.target.value)}
-                  autoComplete="username"
-                  autoCapitalize="none"
-                  autoCorrect="off"
-                  spellCheck="false"
-                  autoFocus
-                />
-              </Field>
-
-              <Field label={t('login.password')} required>
-                <div style={{ position: 'relative' }}>
-                  <Input
-                    icon={<LockIcon/>}
-                    type={showPw ? 'text' : 'password'}
-                    placeholder={t('login.passwordPlaceholder')}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    autoComplete="current-password"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPw((s) => !s)}
-                    aria-label={showPw ? 'Hide password' : 'Show password'}
-                    style={{
-                      position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
-                      background: 'transparent', border: 'none', cursor: 'pointer',
-                      color: 'var(--m-ink-mute)', padding: 4, display: 'flex',
-                    }}
-                  >
-                    {showPw ? <EyeOffIcon size={16}/> : <I.eye size={16}/>}
-                  </button>
-                </div>
-              </Field>
-
-              {error && (
-                <div style={{
-                  padding: '10px 12px', background: 'var(--m-bad-soft)',
-                  color: 'var(--m-bad)', borderRadius: 9, fontSize: 12.5, lineHeight: 1.4,
-                }}>{error}</div>
-              )}
-
-              <Button
-                type="submit" variant="primary" size="lg" full
-                iconRight={loading ? null : <I.arrowR/>}
-                disabled={loading || !identifier || !password}
-                style={loading ? { opacity: 0.7, cursor: 'wait' } : undefined}
-              >
-                {loading ? t('login.signingIn') : t('login.signIn')}
-              </Button>
-
-              <div style={{ fontSize: 11.5, color: 'var(--m-ink-mute)', lineHeight: 1.5 }}>
-                {t('login.terms')}
-              </div>
-            </form>
+            {formBlock}
 
             {/* Sign-up CTA box */}
             <div style={{
@@ -214,12 +274,7 @@ export default function Login() {
               </a>
             </div>
 
-            {(loginHint?.admin || loginHint?.merchant) && (
-              <div style={{ marginTop: 4, fontSize: 11.5, opacity: 0.55, textAlign: 'center', lineHeight: 1.6 }}>
-                {loginHint.admin && <div>{loginHint.admin}</div>}
-                {loginHint.merchant && <div>{loginHint.merchant}</div>}
-              </div>
-            )}
+            {loginHintBlock}
           </div>
         </div>
       </div>

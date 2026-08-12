@@ -76,6 +76,11 @@ services:
       - app_tmp:/tmp
       - app_media:/app/media   # yuklangan rasmlar (push banner) — redeploy'da saqlanadi
       - ./firebase-adminsdk.json:/app/firebase-adminsdk.json:ro
+      # Monvo-merchant (Flutter) web build — /opt/monvo-merchant-web'da qo'lda
+      # build qilinadi (alohida repo, shu Docker image tarkibida emas).
+      # Qayta build qilish: /opt/monvo-merchant-src'ni yangilab, Flutter
+      # Docker orqali build qiling (buyruq: DEPLOYMENT.md).
+      - /opt/monvo-merchant-web:/app/merchant-app:ro
     depends_on:
       postgres:
         condition: service_healthy

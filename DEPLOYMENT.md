@@ -132,6 +132,41 @@ docker compose build app
 docker compose up -d --no-deps app
 ```
 
+### Monvo-merchant (Flutter) — Telegram Mini App (/m) ni qayta build qilish
+
+`/m/` bot orqali ochiladigan Flutter web build'i — bu `monvo` repo ichida
+emas, **alohida** `Monvo-merchant` (GitHub: `XayitovB/kardly_business`)
+repo'sidan qo'lda build qilinadi va `docker-compose.yml`da bind-mount
+qilingan (`/opt/monvo-merchant-web:/app/merchant-app:ro`). Sabab: repo
+alohida, VPS'dagi deploy key faqat `monvo` repo'ga ruxsat berilgan, shuning
+uchun asosiy Docker image ichiga (Dockerfile'ga) kiritilmagan — Flutter
+SDK'ni doimiy o'rnatmasdan, bir martalik Docker konteyner orqali build
+qilinadi.
+
+Yangi versiya chiqqanda VPS da:
+```bash
+# 1. Manba kodini yangilash (lokal kompyuterdan, chunki VPS'ning bu repo'ga
+#    Git kirish huquqi yo'q — yoki VPS'da SSH deploy key qo'shilgan bo'lsa,
+#    to'g'ridan-to'g'ri git pull ham bo'ladi):
+#    lokal: cd Monvo-merchant && git archive --format=tar HEAD | gzip > /tmp/mm.tar.gz
+#    lokal: scp /tmp/mm.tar.gz root@169.58.50.8:/tmp/
+ssh root@169.58.50.8
+rm -rf /opt/monvo-merchant-src/* && tar -xzf /tmp/mm.tar.gz -C /opt/monvo-merchant-src
+
+# 2. Flutter Docker orqali build (Flutter SDK VPS'da doimiy o'rnatilmagan)
+docker run --rm \
+  -v /opt/monvo-merchant-src:/app \
+  -v /opt/monvo-merchant-web:/output \
+  -w /app \
+  ghcr.io/cirruslabs/flutter:stable \
+  sh -c "git config --global --add safe.directory /app && flutter pub get && \
+         flutter build web -t lib/main_merchant.dart --base-href=/m/ --release && \
+         rm -rf /output/* && cp -r build/web/* /output/"
+
+# 3. Backend qayta restart shart emas — bind-mount fayllari to'g'ridan-to'g'ri
+#    diskdan o'qiladi, faqat brauzer/Telegram keshini tozalash kifoya.
+```
+
 ### Variant 2 — Avtomatik (GitHub Actions)
 
 Lokal kompyuterdan `git push` qilganda VPS avtomatik yangilanadi.
