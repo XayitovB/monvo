@@ -67,12 +67,18 @@ npm run dev
 
 ## Deployment
 
-Single Docker image (multi-stage `Dockerfile`) built and run via `docker-compose.shared-server.yml` on a VPS behind nginx. See `DEPLOYMENT.md` for the full VPS setup and update procedure.
+Single Docker image (multi-stage `Dockerfile`) built and run via `docker-compose.yml` on a VPS behind nginx. See `DEPLOYMENT.md` for the full VPS setup and update procedure.
+
+`docker-compose.shared-server.yml` is a plain reference file (no nginx, no
+`/opt/monvo-merchant-web` bind-mount for the `/m` Telegram Mini App) — do
+**not** use it to deploy this app; it will silently drop the merchant
+Mini App mount. Always use the default `docker-compose.yml` (`-p monvo`,
+or just `name: monvo` from the file, no `-f` needed) as in `DEPLOYMENT.md`.
 
 ```bash
 git push origin main
 # on the VPS:
 cd /opt/monvo && git pull
-cd backend && docker compose -p monvo -f docker-compose.shared-server.yml --env-file .env build app
-docker compose -p monvo -f docker-compose.shared-server.yml --env-file .env up -d --no-deps app
+cd backend && docker compose -p monvo build app
+docker compose -p monvo up -d --no-deps app
 ```
