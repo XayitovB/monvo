@@ -4,7 +4,9 @@ routers/merchant_bot.py
 @Monvo_business_bot — merchant Telegram bot.
 
 Stateless webhook: kelgan har xabarga (ayniqsa /start) inline `web_app` tugmali
-javob yuboradi → tugma bosilganda merchant Mini App (/m/) ochiladi.
+javob yuboradi → tugma bosilganda merchant panel (/merchant, React SPA)
+Telegram Mini App sifatida ochiladi (merchant-main.jsx'da Telegram WebApp SDK
+init qilingan: ready/expand/header rangi).
 
 Customer bot (telegram_bot.py — aiogram, /tg) dan ALOHIDA. Bu yerda aiogram
 lifespan / per-worker bot instance kerak emas — webhook to'liq stateless:
@@ -31,7 +33,7 @@ router = APIRouter(prefix="/merchant-bot", tags=["🤖 Merchant Bot"])
 
 def _webapp_url() -> str:
     base = (settings.FRONTEND_URL or "https://monvo.uz").rstrip("/")
-    return f"{base}/m/"
+    return f"{base}/merchant"
 
 
 _BANNER_VER: str | None = None
