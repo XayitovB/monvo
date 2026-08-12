@@ -20,6 +20,13 @@
 #
 ###############################################################################
 
+# Loyiha nomini qat'iy belgilaydi — shu server "/opt/kardly" (butunlay boshqa,
+# alohida loyiha) bilan bir xil "backend" papka nomiga ega, shuning uchun `-p`
+# bayrog'isiz `docker compose` avtomatik "backend" nomini olib, ikkalasining
+# konteyner/tarmoq nomlari to'qnashib ketishi mumkin edi. `name:` bu xavfni
+# butunlay yo'q qiladi.
+name: monvo
+
 services:
 
   # ════════════════════════════════════════════════════════════════
@@ -55,6 +62,7 @@ services:
   # FASTAPI APP — 6 worker (8 vCPU ning 75%)
   # ════════════════════════════════════════════════════════════════
   app:
+    container_name: monvo_backend
     build:
       context: ..
       dockerfile: Dockerfile

@@ -57,6 +57,23 @@ VPS deploy va kelajakda o'zgartirish kiritish bo'yicha to'liq qo'llanma.
 
 ---
 
+## ⚠️ Diqqat — shu VPS'da boshqa, aloqasiz loyiha ham bor
+
+Shu server (`169.58.50.8`) da `/opt/kardly` degan **butunlay boshqa, alohida**
+GitHub repo (`XayitovB/kardly.git`, `kardly.uz` domeni) ham joylashgan —
+har 2 daqiqada avtomatik cron orqali (`/opt/auto-deploy.sh`) deploy qilinadi.
+`/opt/kardly/backend` va `/opt/monvo/backend` papka nomlari bir xil
+("backend") bo'lgani uchun, `docker compose` buyrug'i `-p`/`name:` siz
+ishlatilsa, IKKALASI HAM bir xil standart loyiha nomini ("backend") olib,
+konteyner/tarmoq nomlari to'qnashishi mumkin edi (2026-08-12'da shu sabab
+production incident bo'ldi). Shuning uchun `docker-compose.yml`ning boshida
+endi `name: monvo` qat'iy belgilangan — bu muammoni doimiy hal qiladi.
+**Agar eski (`name:` qo'shilishidan oldingi) versiyada ishlasangiz, doim
+`docker compose -p monvo ...` deb aniq yozing**, hech qachon oddiy
+`docker compose ...` ishlatmang shu papkada.
+
+---
+
 ## Tezkor komandalar
 
 VPS da SSH bilan ulan:
