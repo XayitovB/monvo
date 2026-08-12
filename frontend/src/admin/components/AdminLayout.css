@@ -241,6 +241,22 @@
 
 .al-topbar-spacer { flex: 1; }
 
+.al-ai-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: var(--a-gradient);
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  transition: opacity 0.15s, transform 0.15s;
+}
+.al-ai-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
 .al-topbar-admin {
   display: inline-flex;
   align-items: baseline;

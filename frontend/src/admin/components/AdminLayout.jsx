@@ -194,6 +194,11 @@ export default function AdminLayout({ children }) {
 
           <div className="al-topbar-spacer"/>
 
+          <button className="al-ai-btn" onClick={() => navigate('/panel/ai-assistant')} title="AI yordamchi">
+            <Bot size={15}/>
+            <span>AI</span>
+          </button>
+
           <div className="al-topbar-admin">
             <span className="al-topbar-admin-name">{admin.username}</span>
             <span className="al-topbar-admin-role">· {admin.role}</span>

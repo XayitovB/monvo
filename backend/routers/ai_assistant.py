@@ -54,6 +54,42 @@ class ChatIn(BaseModel):
     message: str = Field(min_length=1, max_length=4000)
 
 
+async def _admin_stats_context(db: AsyncSession) -> str:
+    """Dashboard'dagi bilan bir xil real-vaqt statistikasini matn ko'rinishida qaytaradi.
+
+    /admin/stats endpointining o'zini (admin_analytics.py) qayta ishlatadi —
+    shu bilan ikkala joyda bir xil raqamlar chiqishi kafolatlanadi. Xatolik
+    bo'lsa bo'sh satr qaytaradi — chat statistikasiz ham ishlashda davom etadi.
+    """
+    try:
+        from routers.admin_analytics import admin_stats
+        s = await admin_stats(admin={}, db=db)
+    except Exception as e:
+        logger.warning(f"ai_assistant: stats fetch failed: {e}")
+        return ""
+
+    return (
+        "\n\n---\n"
+        "Joriy platforma statistikasi (bazadan real vaqtda olindi):\n"
+        f"- Jami bizneslar (merchantlar): {s['total_merchants']} ta, shundan aktiv: {s['active_merchants']} ta\n"
+        f"- Bugun qo'shilgan yangi bizneslar: {s['new_merchants_today']} ta\n"
+        f"- Jami mijozlar: {s['total_users']} ta, shundan aktiv: {s['active_users']} ta, "
+        f"nofaol: {s['inactive_users']} ta\n"
+        f"- Bugun qo'shilgan yangi mijozlar: {s['new_users_today']} ta\n"
+        f"- Ilova/webapp ochgan foydalanuvchilar — so'nggi 24 soat: {s['active_24h']}, "
+        f"so'nggi 7 kun: {s['active_7d']}, so'nggi 30 kun: {s['active_30d']}\n"
+        f"- Chiqarilgan kartalar: {s['total_cards']} ta, shundan aktiv: {s['active_cards']} ta\n"
+        f"- Jami tranzaksiyalar: {s['total_transactions']} ta\n"
+        f"- Berilgan ballar: {s['points_issued']}, ishlatilgan ballar: {s['points_redeemed']}\n"
+        f"- Mukofotlar (rewards) soni: {s['total_rewards']} ta\n"
+        "---\n"
+        "Foydalanuvchi shu raqamlar haqida so'rasa yoki tahlil so'rasa (masalan "
+        "o'sish, ulush, taqqoslash, xulosa), ANIQ shu ma'lumotlardan foydalaning. "
+        "Agar so'ralgan narsa shu ro'yxatda bo'lmasa, buni ochiq ayting va "
+        "taxmin qilmang — mos bo'limga (masalan Analitika, Moliya) yo'naltiring."
+    )
+
+
 def _serialize(m: AiChatMessage) -> dict:
     return {
         "id": m.id,
@@ -111,7 +147,8 @@ async def admin_ai_chat(
     request: Request, body: ChatIn, admin: dict = Depends(get_current_admin), db: AsyncSession = Depends(get_db)
 ):
     owner_key = str(admin.get("sub"))
-    reply = await _handle_chat(db, "admin", owner_key, _ADMIN_SYSTEM_PROMPT, body.message.strip())
+    system_prompt = _ADMIN_SYSTEM_PROMPT + await _admin_stats_context(db)
+    reply = await _handle_chat(db, "admin", owner_key, system_prompt, body.message.strip())
     return _serialize(reply)
 
 
