@@ -181,16 +181,28 @@ _CHART_INSTRUCTIONS = (
     "ochiq ayting va chart bloki qo'shmang."
 )
 
+_ANALYST_INSTRUCTIONS = (
+    "\n\n---\n"
+    "TAHLILCHI SIFATIDA ISHLANG: sizga berilgan raqamlarni faqat qaytarib "
+    "aytib bermang — ularni SHARHLANG. \"Holat qanday\", \"biznes qanday "
+    "ketyapti\", \"tahlil qil\" kabi umumiy so'rovlarga: (1) asosiy "
+    "ko'rsatkichlarni ayting, (2) o'sish/pasayish tendensiyasini aniq "
+    "belgilang (foiz bilan, agar mavjud bo'lsa), (3) diqqatga loyiq narsa "
+    "bo'lsa (kuchli o'sish, tushkunlik, g'ayrioddiy raqam) alohida ta'kidlang, "
+    "(4) agar o'rinli bo'lsa 1 ta amaliy tavsiya bering. 2-5 gapli, aniq va "
+    "raqamlarga tayangan xulosa bilan yakunlang — umumiy gaplardan saqlaning."
+)
+
 _ADMIN_SYSTEM_PROMPT = (
     "Siz Monvo platformasining ichki admin paneli uchun AI yordamchisiz. "
     "Monvo — O'zbekistondagi QR loyalty-kartalar platformasi bo'lib, "
     "merchant (biznes)lar, foydalanuvchilar, tranzaksiyalar, tariflar, "
     "push-xabarlar, POS-integratsiyalar va analitika bilan ishlaydi. "
     "Administratorlarga platformani boshqarishda, ma'lumotlarni "
-    "tushunishda, matn (masalan, push-xabar yoki e'lon matni) yozishda va "
-    "umumiy savollariga yordam bering. Qisqa, aniq va professional javob "
-    "bering. Foydalanuvchi qaysi tilda yozsa (o'zbek yoki rus), o'sha "
-    "tilda javob bering." + _CHART_INSTRUCTIONS
+    "tushunishda va tahlil qilishda, matn (masalan, push-xabar yoki e'lon "
+    "matni) yozishda va umumiy savollariga yordam bering. Qisqa, aniq va "
+    "professional javob bering. Foydalanuvchi qaysi tilda yozsa (o'zbek "
+    "yoki rus), o'sha tilda javob bering." + _ANALYST_INSTRUCTIONS + _CHART_INSTRUCTIONS
 )
 
 _MERCHANT_SYSTEM_PROMPT = (
@@ -198,10 +210,10 @@ _MERCHANT_SYSTEM_PROMPT = (
     "yordamchisiz. Monvo — O'zbekistondagi QR loyalty-kartalar platformasi. "
     "Merchantlarga o'z loyallik dasturini sozlashda (ballar/keshbek "
     "qoidalari, mukofotlar), mijozlar bilan ishlashda (CRM, push-xabar "
-    "matnlari), analitikani tushunishda va Monvo imkoniyatlaridan "
-    "samarali foydalanishda maslahat bering. Qisqa, aniq va do'stona "
-    "javob bering. Foydalanuvchi qaysi tilda yozsa (o'zbek yoki rus), "
-    "o'sha tilda javob bering." + _CHART_INSTRUCTIONS
+    "matnlari), biznes holatini tushunish va tahlil qilishda va Monvo "
+    "imkoniyatlaridan samarali foydalanishda maslahat bering. Qisqa, aniq "
+    "va do'stona javob bering. Foydalanuvchi qaysi tilda yozsa (o'zbek "
+    "yoki rus), o'sha tilda javob bering." + _ANALYST_INSTRUCTIONS + _CHART_INSTRUCTIONS
 )
 
 
@@ -325,6 +337,39 @@ async def _merchant_timeseries_context(merchant: Merchant, db: AsyncSession) -> 
     )
 
 
+async def _merchant_overview_context(merchant: Merchant, db: AsyncSession) -> str:
+    """Biznes holati — daromad/tranzaksiya o'sishi, retention/churn, LTV.
+
+    /merchants/analytics/overview (so'nggi 30 kun, oldingi 30 kun bilan
+    solishtirilgan) qayta ishlatiladi — aynan "biznesim qanday ketyapti"
+    turdagi savollarga javob berish uchun eng muhim ko'rsatkichlar shu yerda."""
+    try:
+        from routers.merchant_analytics import m_overview
+        o = await m_overview(days=30, merchant=merchant, db=db)
+    except Exception as e:
+        logger.warning(f"ai_assistant: merchant overview fetch failed: {e}")
+        return ""
+
+    def _fmt_pct(p):
+        return "ma'lumot yo'q (oldingi davr bo'sh)" if p is None else f"{p:+.1f}%"
+
+    return (
+        "\n\n---\n"
+        "Biznes holati — so'nggi 30 kun, undan oldingi 30 kun bilan "
+        "solishtirilgan (bazadan real vaqtda olindi):\n"
+        f"- Daromad: {o['revenue']['current']:.0f} so'm "
+        f"(oldingi davr: {o['revenue']['previous']:.0f} so'm, o'zgarish: {_fmt_pct(o['revenue']['change_pct'])})\n"
+        f"- Tranzaksiyalar: {o['transactions']['current']} ta "
+        f"(oldingi: {o['transactions']['previous']} ta, o'zgarish: {_fmt_pct(o['transactions']['change_pct'])})\n"
+        f"- Yangi kartalar (30 kun): {o['new_cards']} ta\n"
+        f"- Faol mijozlar (30 kun): {o['active_customers']} ta\n"
+        f"- Mijozni saqlab qolish (retention, 30 kun): {o['retention_30d']}%\n"
+        f"- Yo'qotilgan mijozlar (churn, 90+ kun kelmagan): {o['churn_30d']}%\n"
+        f"- O'rtacha mijoz qiymati (LTV): {o['avg_ltv']} so'm\n"
+        "---"
+    )
+
+
 def _serialize(m: AiChatMessage) -> dict:
     return {
         "id": m.id,
@@ -439,6 +484,7 @@ async def merchant_ai_chat(
     system_prompt = (
         _MERCHANT_SYSTEM_PROMPT
         + await _merchant_stats_context(merchant, db)
+        + await _merchant_overview_context(merchant, db)
         + await _merchant_timeseries_context(merchant, db)
     )
     reply = await _handle_chat(db, "merchant", owner_key, system_prompt, body.message.strip())
