@@ -9,7 +9,8 @@ Hujjat: https://platform.openai.com/docs/api-reference/chat
 """
 from __future__ import annotations
 
-from typing import Optional
+import json
+from typing import Awaitable, Callable, Optional
 
 import httpx
 
@@ -70,3 +71,87 @@ async def ask(
             return data["choices"][0]["message"]["content"].strip()
         except (KeyError, IndexError, TypeError) as e:
             raise OpenAIError(f"unexpected response shape: {e}") from e
+
+
+ToolExecutor = Callable[[str, dict], Awaitable[str]]
+
+
+async def ask_with_tools(
+    message: str,
+    history: Optional[list[dict]] = None,
+    system_prompt: Optional[str] = None,
+    tools: Optional[list[dict]] = None,
+    tool_executor: Optional[ToolExecutor] = None,
+    max_rounds: int = 4,
+) -> str:
+    """`ask()` bilan bir xil, lekin OpenAI function-calling (tools) qo'llab-quvvatlaydi.
+
+    Model `tool_calls` qaytarsa, har birini `tool_executor(name, args)` orqali
+    bajaradi (natija matn bo'lishi kerak), natijalarni suhbatga qo'shib modelni
+    qayta chaqiradi — model to'liq matnli javob bergunga qadar (yoki
+    max_rounds tugaguncha) davom etadi.
+    """
+    if not is_configured():
+        raise OpenAIError("OPENAI_API_KEY not configured")
+
+    messages = [{"role": "system", "content": system_prompt or settings.OPENAI_SYSTEM_PROMPT}]
+    for h in (history or []):
+        role = "assistant" if h.get("role") == "assistant" else "user"
+        text = (h.get("text") or "").strip()
+        if text:
+            messages.append({"role": role, "content": text})
+    messages.append({"role": "user", "content": message})
+
+    async with httpx.AsyncClient(timeout=45.0) as client:
+        for _ in range(max_rounds):
+            payload = {
+                "model": settings.OPENAI_MODEL,
+                "messages": messages,
+                "temperature": 0.4,
+            }
+            if tools:
+                payload["tools"] = tools
+                payload["tool_choice"] = "auto"
+
+            resp = await client.post(
+                CHAT_URL,
+                headers={
+                    "Authorization": f"Bearer {settings.OPENAI_API_KEY}",
+                    "Content-Type": "application/json",
+                },
+                json=payload,
+            )
+            if resp.status_code != 200:
+                raise OpenAIError(f"chat {resp.status_code}: {resp.text[:300]}")
+            data = resp.json()
+            try:
+                msg = data["choices"][0]["message"]
+            except (KeyError, IndexError, TypeError) as e:
+                raise OpenAIError(f"unexpected response shape: {e}") from e
+
+            tool_calls = msg.get("tool_calls")
+            if not tool_calls:
+                return (msg.get("content") or "").strip()
+
+            messages.append(msg)
+            for tc in tool_calls:
+                fn = tc.get("function") or {}
+                name = fn.get("name") or ""
+                try:
+                    args = json.loads(fn.get("arguments") or "{}")
+                except json.JSONDecodeError:
+                    args = {}
+                if tool_executor:
+                    try:
+                        result = await tool_executor(name, args)
+                    except Exception as e:  # noqa: BLE001
+                        result = f"XATOLIK: funksiya ishlamadi — {type(e).__name__}: {e}"
+                else:
+                    result = "XATOLIK: tool_executor sozlanmagan"
+                messages.append({
+                    "role": "tool",
+                    "tool_call_id": tc.get("id", ""),
+                    "content": str(result)[:8000],
+                })
+
+        return "Kechirasiz, so'rovingiz juda ko'p qadam talab qildi — birozroq aniqroq savol bering."
