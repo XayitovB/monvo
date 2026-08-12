@@ -335,12 +335,19 @@ class _SecurityHeadersMiddleware(BaseHTTPMiddleware):
         h.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
         h.setdefault("Permissions-Policy", "geolocation=(self), camera=(self), microphone=()")
         h.setdefault("Cross-Origin-Opener-Policy", "same-origin")
-        # Telegram Mini App iframe'da ochiladi — unga frame-deny qo'ymaymiz.
-        if not request.url.path.startswith("/tg"):
+        # Telegram Mini App'lar iframe'da ochiladi (ayniqsa Telegram Desktop) —
+        # ularga frame-deny qo'ymaymiz. /m — merchant (Flutter web), /tg — customer.
+        if not (request.url.path.startswith("/tg") or request.url.path.startswith("/m")):
             h.setdefault("X-Frame-Options", "SAMEORIGIN")
         # HSTS — faqat production'da (HTTPS ortida). Dev'da http buzilmasin.
         if _IS_PROD:
             h.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
+        # Flutter web build fayllari (main.dart.js va h.k.) har doim BIR XIL
+        # nomda qoladi — CDN/brauzer uzoq muddat keshласа, qayta deploy qilingan
+        # kod ko'rinmay qoladi (aynan shu sabab bo'sh ekran chiqqan edi). Har bir
+        # so'rovda origin bilan qayta tekshirilishini majburlaymiz.
+        if request.url.path.startswith("/m") or request.url.path.startswith("/tg"):
+            h["Cache-Control"] = "no-cache, must-revalidate"
         return response
 
 
