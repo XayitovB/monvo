@@ -37,9 +37,22 @@ from database import get_db
 router = APIRouter(prefix="/merchant-bot", tags=["🤖 Merchant Bot"])
 
 
+_WEBAPP_VER: str | None = None
+
+
 def _webapp_url() -> str:
+    # Telegram web_app URL'ni ham banner kabi keshlaydi — WebView eski
+    # (masalan avvalgi noto'g'ri build/mount holatidagi) nusxani ko'rsatishda
+    # davom etishi mumkin. Build ID query bilan har deploy'da URL o'zgaradi.
+    global _WEBAPP_VER
+    if _WEBAPP_VER is None:
+        try:
+            with open(os.path.join("merchant-app", ".last_build_id")) as f:
+                _WEBAPP_VER = f.read().strip() or "0"
+        except OSError:
+            _WEBAPP_VER = "0"
     base = (settings.FRONTEND_URL or "https://monvo.uz").rstrip("/")
-    return f"{base}/m/"
+    return f"{base}/m/?v={_WEBAPP_VER}"
 
 
 _BANNER_VER: str | None = None
