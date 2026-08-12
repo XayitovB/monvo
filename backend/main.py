@@ -11,6 +11,7 @@ Tarkibi:
   - Static: /panel (merchant/admin panel), / (landing)
 """
 import os
+import re
 import sys
 from contextlib import asynccontextmanager
 
@@ -326,6 +327,12 @@ app.add_middleware(GZipMiddleware, minimum_size=1024, compresslevel=5)
 # qo'yilmaydi; qolgan hammasi SAMEORIGIN.
 _IS_PROD = settings.APP_ENV.lower() == "production"
 
+# /m/<build_id>/<asset> — versiyalangan (immutable) merchant-app fayllari.
+# Bularga pastdagi umumiy "/m" no-cache qoidasi qo'llanilmasligi kerak,
+# aks holda ularning o'z immutable Cache-Control header'i qayta yozilib
+# ketadi (qarang: routers pastida _merchant_build_id() atrofi).
+_MERCHANT_VERSIONED_ASSET_RE = re.compile(r"^/m/[^/]+/.")
+
 
 class _SecurityHeadersMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
@@ -345,8 +352,13 @@ class _SecurityHeadersMiddleware(BaseHTTPMiddleware):
         # Flutter web build fayllari (main.dart.js va h.k.) har doim BIR XIL
         # nomda qoladi — CDN/brauzer uzoq muddat keshласа, qayta deploy qilingan
         # kod ko'rinmay qoladi (aynan shu sabab bo'sh ekran chiqqan edi). Har bir
-        # so'rovda origin bilan qayta tekshirilishini majburlaymiz.
-        if request.url.path.startswith("/m") or request.url.path.startswith("/tg"):
+        # so'rovda origin bilan qayta tekshirilishini majburlaymiz — versiyalangan
+        # (/m/<build_id>/...) fayllar bundan mustasno, ular o'zining immutable
+        # header'ini olib yuradi (build-id o'zgarmas ekan, keshlash xavfsiz).
+        path = request.url.path
+        if path.startswith("/tg") or (
+            path.startswith("/m") and not _MERCHANT_VERSIONED_ASSET_RE.match(path)
+        ):
             h["Cache-Control"] = "no-cache, must-revalidate"
         return response
 
@@ -957,9 +969,56 @@ if os.path.isdir("tg-static"):
     logger.success("✅ Telegram Mini App: /tg")
 
 # Merchant mobil ilova (Flutter web) — Telegram bot WebApp sifatida /m da.
+# Build fayllari (main.dart.js va h.k.) har deploy'da bir xil nomda qoladi —
+# shu sabab oddiy "no-cache" header'iga tayanib bo'lmaydi: Cloudflare va
+# ba'zi WebView'lar statik kengaytmalar (.js/.wasm) uchun uni e'tiborsiz
+# qoldirib, o'zining uzoq muddatli (masalan 4 soatlik) keshini qo'llайди —
+# aynan shu sabab redeploy'dan keyin bot "bo'sh ekran" ko'rsatgan. Yechim:
+# har bir build o'ziga xos build-id bilan versiyalangan yo'lda
+# (/m/<build_id>/...) serve qilinadi va "immutable" deb belgilanadi — bu
+# yo'l qanchalik agressiv keshlansa ham xato bo'lmaydi, chunki build-id
+# o'zgarmagunча ostidagi fayl ham o'zgarmaydi. Kirish nuqtasi (/m/) esa
+# doim "no-cache" bilan, joriy build-id'ga ishora qiluvchi <base href> shu
+# zahoti yozilgan HTML'ni qaytaradi — shu orqali har safar yangi bot
+# tugmasi bosilganda foydalanuvchi hech qachon keshlanmagan versiyani oladi.
 if os.path.isdir("merchant-app"):
+    from fastapi.responses import FileResponse as _MerchantFileResponse
+
+    def _merchant_build_id() -> str:
+        try:
+            with open("merchant-app/.last_build_id") as f:
+                return f.read().strip() or "0"
+        except OSError:
+            return "0"
+
+    _MERCHANT_DIR_PREFIX = "merchant-app" + os.sep
+
+    @app.get("/m/{build_id}/{asset_path:path}", include_in_schema=False)
+    async def serve_merchant_versioned_asset(build_id: str, asset_path: str):
+        target = os.path.normpath(os.path.join("merchant-app", asset_path))
+        if not target.startswith(_MERCHANT_DIR_PREFIX) or not os.path.isfile(target):
+            return PlainTextResponse("Not found", status_code=404)
+        resp = _MerchantFileResponse(target)
+        resp.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+        return resp
+
+    @app.get("/m", include_in_schema=False)
+    @app.get("/m/", include_in_schema=False)
+    async def serve_merchant_entry():
+        try:
+            with open("merchant-app/index.html", encoding="utf-8") as f:
+                html = f.read()
+        except OSError:
+            return PlainTextResponse("Merchant app not found", status_code=404)
+        html = html.replace('<base href="/m/">', f'<base href="/m/{_merchant_build_id()}/">', 1)
+        resp = Response(content=html, media_type="text/html")
+        resp.headers["Cache-Control"] = "no-cache, must-revalidate"
+        return resp
+
+    # Versiyalanmagan (eski/to'g'ridan-to'g'ri) so'rovlar uchun fallback —
+    # yuqoridagi yo'llarga to'g'ri kelmagan hamma narsa shundan ushlanadi.
     app.mount("/m", StaticFiles(directory="merchant-app", html=True), name="merchant-app")
-    logger.success("✅ Merchant mobile app (Telegram WebApp): /m")
+    logger.success(f"✅ Merchant mobile app (Telegram WebApp): /m (build {_merchant_build_id()})")
 
 # Yuklangan rasmlar (push banner, e'lon) — doimiy media papka (docker volume).
 # '/' mount hammasini ushlagani uchun bundan OLDIN turishi shart.
