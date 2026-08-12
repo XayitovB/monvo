@@ -26,6 +26,26 @@ _PAGE_LIMIT = 200     # UI'ga qaytariladigan saqlangan xabarlar soni
 _FALLBACK_UNCONFIGURED = "AI yordamchi hozircha sozlanmagan. Administratorga murojaat qiling."
 _FALLBACK_ERROR = "Kechirasiz, hozir javob bera olmadim. Birozdan so'ng qayta urinib ko'ring."
 
+_CHART_INSTRUCTIONS = (
+    "\n\n---\n"
+    "GRAFIK CHIZISH QOIDASI: foydalanuvchi grafik/diagramma/chart/tendensiya "
+    "so'rasa (masalan \"o'sish grafigini ko'rsat\", \"kunlik tranzaksiyalarni "
+    "diagrammada ko'rsat\"), javobingizga albatta quyidagi formatda ```chart "
+    "bilan boshlanuvchi bitta JSON blok qo'shing — faqat pastda berilgan "
+    "haqiqiy kunlik ma'lumotlardan foydalaning, hech qachon raqam o'ylab "
+    "topmang:\n"
+    "```chart\n"
+    "{\"type\": \"line\", \"title\": \"So'nggi 14 kun — yangi mijozlar\", "
+    "\"labels\": [\"01 Avg\", \"02 Avg\"], \"series\": "
+    "[{\"name\": \"Mijozlar\", \"data\": [3, 5]}]}\n"
+    "```\n"
+    "type — \"line\" yoki \"bar\". labels — X o'qi (sanalar). series — bir yoki "
+    "bir nechta qator, har birida name va data (labels bilan bir xil uzunlikda "
+    "sonlar massivi). JSON bloqdan oldin 1-2 gapli qisqa izoh yozing. Agar "
+    "grafik uchun yetarli ma'lumot (masalan boshqa metrika) bo'lmasa, buni "
+    "ochiq ayting va chart bloki qo'shmang."
+)
+
 _ADMIN_SYSTEM_PROMPT = (
     "Siz Monvo platformasining ichki admin paneli uchun AI yordamchisiz. "
     "Monvo — O'zbekistondagi QR loyalty-kartalar platformasi bo'lib, "
@@ -35,7 +55,7 @@ _ADMIN_SYSTEM_PROMPT = (
     "tushunishda, matn (masalan, push-xabar yoki e'lon matni) yozishda va "
     "umumiy savollariga yordam bering. Qisqa, aniq va professional javob "
     "bering. Foydalanuvchi qaysi tilda yozsa (o'zbek yoki rus), o'sha "
-    "tilda javob bering."
+    "tilda javob bering." + _CHART_INSTRUCTIONS
 )
 
 _MERCHANT_SYSTEM_PROMPT = (
@@ -46,7 +66,7 @@ _MERCHANT_SYSTEM_PROMPT = (
     "matnlari), analitikani tushunishda va Monvo imkoniyatlaridan "
     "samarali foydalanishda maslahat bering. Qisqa, aniq va do'stona "
     "javob bering. Foydalanuvchi qaysi tilda yozsa (o'zbek yoki rus), "
-    "o'sha tilda javob bering."
+    "o'sha tilda javob bering." + _CHART_INSTRUCTIONS
 )
 
 
@@ -87,6 +107,86 @@ async def _admin_stats_context(db: AsyncSession) -> str:
         "o'sish, ulush, taqqoslash, xulosa), ANIQ shu ma'lumotlardan foydalaning. "
         "Agar so'ralgan narsa shu ro'yxatda bo'lmasa, buni ochiq ayting va "
         "taxmin qilmang — mos bo'limga (masalan Analitika, Moliya) yo'naltiring."
+    )
+
+
+async def _admin_timeseries_context(db: AsyncSession) -> str:
+    """Grafik chizish uchun kunlik vaqt-qatori ma'lumotlarini matn ko'rinishida beradi.
+
+    /admin/growth (so'nggi 14 kun: yangi mijoz/biznes) va /admin/chart-data
+    (so'nggi 7 kun: tranzaksiyalar) endpointlarini qayta ishlatadi. Xatolik
+    bo'lsa bo'sh satr qaytaradi.
+    """
+    try:
+        from routers.admin_analytics import admin_chart_data, admin_growth
+        growth = await admin_growth(days=14, date_from=None, date_to=None, single_date=None, admin={}, db=db)
+        chart = await admin_chart_data(admin={}, db=db)
+    except Exception as e:
+        logger.warning(f"ai_assistant: timeseries fetch failed: {e}")
+        return ""
+
+    growth_lines = "\n".join(
+        f"  {r['date']}: yangi mijozlar={r['new_users']}, yangi bizneslar={r['new_merchants']}"
+        for r in growth["data"]
+    )
+    tx_lines = "\n".join(
+        f"  {r['date']}: tranzaksiyalar={r['total']}"
+        for r in chart["daily_transactions"]
+    )
+    return (
+        "\n\n---\n"
+        "Kunlik vaqt-qatori ma'lumotlari (grafik chizish uchun, bazadan real vaqtda olindi):\n"
+        "So'nggi 14 kun — yangi mijozlar va bizneslar:\n"
+        f"{growth_lines}\n"
+        "So'nggi 7 kun — tranzaksiyalar soni:\n"
+        f"{tx_lines}\n"
+        "---"
+    )
+
+
+async def _merchant_stats_context(merchant: Merchant, db: AsyncSession) -> str:
+    """Merchantning o'z KPI'larini (/merchants/stats bilan bir xil) matn ko'rinishida beradi."""
+    try:
+        from routers.merchants import merchant_stats
+        s = await merchant_stats(merchant=merchant, db=db)
+    except Exception as e:
+        logger.warning(f"ai_assistant: merchant stats fetch failed: {e}")
+        return ""
+
+    return (
+        "\n\n---\n"
+        "Joriy biznes statistikasi (bazadan real vaqtda olindi):\n"
+        f"- Jami kartalar: {s['cards_total']} ta, shundan aktiv: {s['cards_active']} ta\n"
+        f"- Berilgan ballar: {s['points_issued']}, ishlatilgan ballar: {s['points_redeemed']}\n"
+        f"- Aktiv mukofotlar soni: {s['active_rewards']} ta\n"
+        "---\n"
+        "Foydalanuvchi shu raqamlar haqida so'rasa yoki tahlil so'rasa, ANIQ shu "
+        "ma'lumotlardan foydalaning. Agar so'ralgan narsa shu ro'yxatda bo'lmasa, "
+        "buni ochiq ayting va taxmin qilmang."
+    )
+
+
+async def _merchant_timeseries_context(merchant: Merchant, db: AsyncSession) -> str:
+    """Grafik chizish uchun kunlik vaqt-qatori (/merchants/analytics/trend, so'nggi 14 kun)."""
+    try:
+        from routers.merchants import analytics_trend
+        trend = await analytics_trend(days=14, merchant=merchant, db=db)
+    except Exception as e:
+        logger.warning(f"ai_assistant: merchant timeseries fetch failed: {e}")
+        return ""
+
+    lines = "\n".join(
+        f"  {r['date']}: ball ishlangan tranzaksiya={r['earn_count']} ta, "
+        f"ishlatilgan tranzaksiya={r['redeem_count']} ta, "
+        f"ishlangan ball={r['points_earned']}, ishlatilgan ball={r['points_redeemed']}"
+        for r in trend["data"]
+    )
+    return (
+        "\n\n---\n"
+        "Kunlik vaqt-qatori ma'lumotlari (grafik chizish uchun, bazadan real vaqtda olindi):\n"
+        "So'nggi 14 kun — ball ishlash/ishlatish tranzaksiyalari:\n"
+        f"{lines}\n"
+        "---"
     )
 
 
@@ -147,7 +247,7 @@ async def admin_ai_chat(
     request: Request, body: ChatIn, admin: dict = Depends(get_current_admin), db: AsyncSession = Depends(get_db)
 ):
     owner_key = str(admin.get("sub"))
-    system_prompt = _ADMIN_SYSTEM_PROMPT + await _admin_stats_context(db)
+    system_prompt = _ADMIN_SYSTEM_PROMPT + await _admin_stats_context(db) + await _admin_timeseries_context(db)
     reply = await _handle_chat(db, "admin", owner_key, system_prompt, body.message.strip())
     return _serialize(reply)
 
@@ -181,7 +281,12 @@ async def merchant_ai_chat(
     db: AsyncSession = Depends(get_db),
 ):
     owner_key = str(merchant.id)
-    reply = await _handle_chat(db, "merchant", owner_key, _MERCHANT_SYSTEM_PROMPT, body.message.strip())
+    system_prompt = (
+        _MERCHANT_SYSTEM_PROMPT
+        + await _merchant_stats_context(merchant, db)
+        + await _merchant_timeseries_context(merchant, db)
+    )
+    reply = await _handle_chat(db, "merchant", owner_key, system_prompt, body.message.strip())
     return _serialize(reply)
 
 

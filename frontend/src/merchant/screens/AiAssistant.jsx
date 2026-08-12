@@ -1,17 +1,75 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { I, T, Button } from '../kit';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { I, T, Button, LineChart as KitLineChart, BarChart as KitBarChart } from '../kit';
 import Topbar from '../layout/Topbar';
 import { useLang } from '../i18n/LangContext';
 import api from '../api';
 
+const CHART_COLORS = ['#2F6B3F', '#0F766E', '#B45309', '#7C4A8C', '#9F1239'];
+const CHART_BLOCK_RE = /```chart\s*([\s\S]*?)```/;
+
+// AI javobidan ```chart{...}``` blokini ajratib oladi — muvaffaqiyatsiz
+// bo'lsa (JSON buzuq yoki shakl noto'g'ri) butun matnni o'zgarishsiz qaytaradi.
+function parseAiContent(content) {
+  const match = content.match(CHART_BLOCK_RE);
+  if (!match) return { text: content, chart: null };
+  try {
+    const spec = JSON.parse(match[1]);
+    const labels = Array.isArray(spec.labels) ? spec.labels : null;
+    const series = Array.isArray(spec.series) ? spec.series : null;
+    if (!labels || !series || !series.every(s => s && typeof s.name === 'string' && Array.isArray(s.data))) {
+      return { text: content, chart: null };
+    }
+    const text = content.replace(CHART_BLOCK_RE, '').trim();
+    return { text, chart: { ...spec, labels, series } };
+  } catch {
+    return { text: content, chart: null };
+  }
+}
+
+function AiChart({ spec }) {
+  const isBar = spec.type === 'bar' && spec.series.length === 1;
+  return (
+    <div style={{ width: '100%' }}>
+      {spec.title && <div style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--m-ink-mute)', marginBottom: 6 }}>{spec.title}</div>}
+      <div style={{ overflowX: 'auto' }}>
+        {isBar ? (
+          <KitBarChart data={spec.series[0].data} labels={spec.labels} color={CHART_COLORS[0]} w={520} h={160} />
+        ) : (
+          <KitLineChart
+            series={spec.series.map((s, i) => ({ data: s.data, color: CHART_COLORS[i % CHART_COLORS.length], fill: i === 0 }))}
+            labels={spec.labels}
+            w={520}
+            h={200}
+          />
+        )}
+      </div>
+      {spec.series.length > 1 && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginTop: 8 }}>
+          {spec.series.map((s, i) => (
+            <div key={s.name} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11.5, color: 'var(--m-ink-soft)' }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: CHART_COLORS[i % CHART_COLORS.length] }}/>
+              {s.name}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function Bubble({ role, content }) {
   const isUser = role === 'user';
+  const { text, chart } = useMemo(
+    () => (isUser ? { text: content, chart: null } : parseAiContent(content)),
+    [content, isUser]
+  );
   return (
     <div style={{
       display: 'flex', gap: 10, alignItems: 'flex-start',
       alignSelf: isUser ? 'flex-end' : 'flex-start',
       flexDirection: isUser ? 'row-reverse' : 'row',
-      maxWidth: '78%',
+      maxWidth: chart ? '96%' : '78%',
+      width: chart ? '96%' : undefined,
     }}>
       <div style={{
         width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
@@ -23,12 +81,16 @@ function Bubble({ role, content }) {
       </div>
       <div style={{
         padding: '10px 14px', borderRadius: 14,
-        fontSize: 14, lineHeight: 1.5, whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+        fontSize: 14, lineHeight: 1.5, wordBreak: 'break-word',
         background: isUser ? 'var(--m-brand)' : 'var(--m-surface-alt)',
         color: isUser ? '#fff' : 'var(--m-ink)',
         borderBottomRightRadius: isUser ? 4 : 14,
         borderBottomLeftRadius: isUser ? 14 : 4,
-      }}>{content}</div>
+        display: 'flex', flexDirection: 'column', gap: 10, minWidth: 0,
+      }}>
+        {text && <div style={{ whiteSpace: 'pre-wrap' }}>{text}</div>}
+        {chart && <AiChart spec={chart}/>}
+      </div>
     </div>
   );
 }
