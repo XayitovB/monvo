@@ -6,8 +6,6 @@ xabarlar tarix sifatida OpenAI'ga yuboriladi, so'ng user+assistant
 xabarlari bazaga yoziladi — shu bilan suhbat xotirasi sahifa yangilansa
 yoki qayta kirilsa ham saqlanib qoladi.
 """
-from __future__ import annotations
-
 from fastapi import APIRouter, Depends, Request
 from loguru import logger
 from pydantic import BaseModel, Field
