@@ -154,6 +154,10 @@ ssh root@169.58.50.8
 rm -rf /opt/monvo-merchant-src/* && tar -xzf /tmp/mm.tar.gz -C /opt/monvo-merchant-src
 
 # 2. Flutter Docker orqali build (Flutter SDK VPS'da doimiy o'rnatilmagan)
+#    MUHIM: manba papka avval TO'LIQ tozalanishi kerak (yashirin .dart_tool/
+#    ham) — aks holda eski (masalan hali "kardly" nomli) build keshi
+#    qolib, "Undefined name 'main'" kabi tushunarsiz xatolar chiqadi:
+#      find /opt/monvo-merchant-src -mindepth 1 -maxdepth 1 -exec rm -rf {} +
 docker run --rm \
   -v /opt/monvo-merchant-src:/app \
   -v /opt/monvo-merchant-web:/output \
@@ -163,8 +167,45 @@ docker run --rm \
          flutter build web -t lib/main_merchant.dart --base-href=/m/ --release && \
          rm -rf /output/* && cp -r build/web/* /output/"
 
-# 3. Backend qayta restart shart emas — bind-mount fayllari to'g'ridan-to'g'ri
-#    diskdan o'qiladi, faqat brauzer/Telegram keshini tozalash kifoya.
+# 2b. Flutter'ning standart Service Worker'ini o'chirish (MUHIM — shart!).
+#     Flutter 3.44+ da buni build flag bilan o'chirib bo'lmaydi (--pwa-strategy
+#     olib tashlangan). SW yoqilgan qolsa, WebView/brauzer eski (buzuq)
+#     build'ni HAR QANDAY server-tarafi cache-fix'dan mustaqil ravishda
+#     keshda saqlab, "bo'sh oq/qora ekran" muammosini qaytarishi mumkin
+#     (2026-08-12'da shu sabab production incident bo'ldi). Har build'dan
+#     keyin ikkalasini ham bajaring:
+cd /opt/monvo-merchant-web
+python3 -c "
+import re
+p = 'flutter_bootstrap.js'
+s = open(p, encoding='utf-8').read()
+new = re.sub(r'_flutter\.loader\.load\(\{\s*serviceWorkerSettings:\s*\{[^}]*\}\s*\}\);', '_flutter.loader.load({});', s)
+assert new != s
+open(p, 'w', encoding='utf-8').write(new)
+"
+cat > flutter_service_worker.js <<'EOF'
+// Self-destructing service worker — see note above. Kills any service
+// worker a device registered on a previous (broken) visit.
+self.addEventListener('install', () => self.skipWaiting());
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    self.registration.unregister().then(() =>
+      self.clients.matchAll({ type: 'window' }).then((clients) => {
+        clients.forEach((client) => client.navigate(client.url));
+      })
+    )
+  );
+});
+EOF
+
+# 3. .last_build_id'ni yangilash — merchant bot'ning "Ilovani ochish" tugmasi
+#    shu ID'ni ?v= sifatida ishlatadi (banner rasmidagi kabi cache-bust).
+#    Bootstrap/SW ham hisobga olinadi, chunki ular ham o'zgargan bo'lishi mumkin.
+cat main.dart.js flutter_bootstrap.js flutter_service_worker.js | sha256sum | cut -c1-16 > .last_build_id
+
+# 4. Backend'ni qayta ishga tushirish shart (aks holda .last_build_id eskisi
+#    xotirada qolib, bot tugmasi yangi manzil bermaydi):
+cd /opt/monvo/backend && docker compose -p monvo restart app
 ```
 
 ### Variant 2 — Avtomatik (GitHub Actions)
