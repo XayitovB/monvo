@@ -318,15 +318,22 @@ export function PosIntegrations({ T }) {
                   ? <a key={p.id} href={p.href} target="_blank" rel="noopener noreferrer" aria-label={p.name} style={{ textDecoration: 'none' }}>{card}</a>
                   : <div key={p.id}>{card}</div>;
               })
-            : list.map((name, i) => (
-                <div key={i} style={{
-                  height: 92, padding: '20px 22px',
-                  background: 'var(--k-surface)', border: '1px solid var(--k-line)', borderRadius: 14,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontFamily: 'var(--k-display)', fontSize: 18, fontWeight: 600,
-                  color: 'var(--k-ink-mute)', letterSpacing: -0.4,
-                }}>{name}</div>
-              ))
+            : list.map((name, i) => {
+                const logoSrc = KNOWN_POS_LOGOS[String(name).trim().toLowerCase()];
+                return (
+                  <div key={i} style={{
+                    height: 92, padding: '20px 22px',
+                    background: 'var(--k-surface)', border: '1px solid var(--k-line)', borderRadius: 14,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontFamily: 'var(--k-display)', fontSize: 18, fontWeight: 600,
+                    color: 'var(--k-ink-mute)', letterSpacing: -0.4,
+                  }}>
+                    {logoSrc
+                      ? <img src={logoSrc} alt={name} title={name} loading="lazy" style={{ maxWidth: '100%', maxHeight: 52, objectFit: 'contain' }}/>
+                      : name}
+                  </div>
+                );
+              })
           }
         </div>
       </div>
