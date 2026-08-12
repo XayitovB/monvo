@@ -1,6 +1,6 @@
 """Landing page AI chat vidjeti — POST /support/chat.
 
-Public endpoint (auth talab qilmaydi). GigaChat sozlanmagan yoki xatolik
+Public endpoint (auth talab qilmaydi). OpenAI sozlanmagan yoki xatolik
 bo'lsa ham 200 qaytaradi (ok=false + qulay xabar) — vidjet hech qachon
 buzilib ko'rinmasligi kerak.
 """
@@ -9,7 +9,7 @@ from loguru import logger
 from pydantic import BaseModel, Field
 
 from config import settings
-from integrations import gigachat
+from integrations import openai_chat
 from main import limiter
 
 router = APIRouter(tags=["💬 Support Chat"])
@@ -38,18 +38,18 @@ class ChatIn(BaseModel):
     history: list[ChatHistoryItem] = Field(default_factory=list, max_length=10)
 
 
-@router.post("/support/chat", summary="Landing chat vidjeti (GigaChat)")
+@router.post("/support/chat", summary="Landing chat vidjeti (OpenAI)")
 @limiter.limit("15/minute")
 async def support_chat(request: Request, body: ChatIn):
-    if not gigachat.is_configured():
+    if not openai_chat.is_configured():
         return {"ok": False, "reply": _FALLBACK_UZ}
 
     try:
-        reply = await gigachat.ask(
+        reply = await openai_chat.ask(
             body.message.strip(),
             history=[h.model_dump() for h in body.history],
         )
         return {"ok": True, "reply": reply}
-    except gigachat.GigaChatError as e:
-        logger.warning(f"gigachat error: {e}")
+    except openai_chat.OpenAIError as e:
+        logger.warning(f"openai_chat error: {e}")
         return {"ok": False, "reply": _FALLBACK_UZ}

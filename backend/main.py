@@ -354,6 +354,7 @@ from routers import (
     admin,
     admin_achievements,
     admin_games,
+    ai_assistant,
     analytics,
     announcements,
     app_links,
@@ -442,6 +443,7 @@ app.include_router(merchant_api.router)
 app.include_router(merchant_bot.router)
 app.include_router(crash_reports.router)
 app.include_router(support_chat.router)
+app.include_router(ai_assistant.router)
 
 
 # ── Public app settings (Flutter app fetches this on startup) ─────────────────

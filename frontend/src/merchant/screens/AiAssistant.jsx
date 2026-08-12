@@ -1,0 +1,193 @@
+import React, { useEffect, useRef, useState } from 'react';
+import { I, T, Button } from '../kit';
+import Topbar from '../layout/Topbar';
+import { useLang } from '../i18n/LangContext';
+import api from '../api';
+
+function Bubble({ role, content }) {
+  const isUser = role === 'user';
+  return (
+    <div style={{
+      display: 'flex', gap: 10, alignItems: 'flex-start',
+      alignSelf: isUser ? 'flex-end' : 'flex-start',
+      flexDirection: isUser ? 'row-reverse' : 'row',
+      maxWidth: '78%',
+    }}>
+      <div style={{
+        width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: isUser ? 'var(--m-brand)' : 'var(--m-surface-alt)',
+        color: isUser ? '#fff' : 'var(--m-ink-mute)',
+      }}>
+        {isUser ? <I.user size={14}/> : <I.bot size={14}/>}
+      </div>
+      <div style={{
+        padding: '10px 14px', borderRadius: 14,
+        fontSize: 14, lineHeight: 1.5, whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+        background: isUser ? 'var(--m-brand)' : 'var(--m-surface-alt)',
+        color: isUser ? '#fff' : 'var(--m-ink)',
+        borderBottomRightRadius: isUser ? 4 : 14,
+        borderBottomLeftRadius: isUser ? 14 : 4,
+      }}>{content}</div>
+    </div>
+  );
+}
+
+function TypingBubble() {
+  return (
+    <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', alignSelf: 'flex-start' }}>
+      <div style={{
+        width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: 'var(--m-surface-alt)', color: 'var(--m-ink-mute)',
+      }}><I.bot size={14}/></div>
+      <div style={{
+        padding: '14px', borderRadius: 14, borderBottomLeftRadius: 4,
+        background: 'var(--m-surface-alt)', display: 'flex', gap: 4,
+      }}>
+        {[0, 1, 2].map(i => (
+          <span key={i} style={{
+            width: 6, height: 6, borderRadius: '50%', background: 'var(--m-ink-mute)',
+            animation: `aiaBounce 1.2s ${i * 0.15}s infinite ease-in-out`,
+          }}/>
+        ))}
+      </div>
+      <style>{`@keyframes aiaBounce { 0%,60%,100% { transform: translateY(0); opacity:.5 } 30% { transform: translateY(-4px); opacity:1 } }`}</style>
+    </div>
+  );
+}
+
+export default function AiAssistant() {
+  const { t } = useLang();
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [sending, setSending] = useState(false);
+  const [err, setErr] = useState('');
+  const bottomRef = useRef(null);
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    api.aiAssistantMessages()
+      .then(r => setMessages(r?.messages || []))
+      .catch(e => setErr(e.message))
+      .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, sending]);
+
+  async function send() {
+    const text = input.trim();
+    if (!text || sending) return;
+    setErr('');
+    setInput('');
+    setMessages(m => [...m, { id: `tmp-${Date.now()}`, role: 'user', content: text }]);
+    setSending(true);
+    try {
+      const reply = await api.aiAssistantSend(text);
+      setMessages(m => [...m, reply]);
+    } catch (e) {
+      setErr(e.message);
+    } finally {
+      setSending(false);
+      inputRef.current?.focus();
+    }
+  }
+
+  function onKeyDown(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      send();
+    }
+  }
+
+  async function clearHistory() {
+    if (!confirm(t('aia.clear_confirm'))) return;
+    try {
+      await api.aiAssistantClear();
+      setMessages([]);
+    } catch (e) { setErr(e.message); }
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <Topbar
+        title={t('aia.title')}
+        actions={
+          <Button variant="ghost" size="sm" icon={<I.x/>} onClick={clearHistory} disabled={!messages.length}>
+            {t('aia.clear')}
+          </Button>
+        }
+      />
+
+      <div style={{
+        flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column',
+        margin: '16px 28px 28px', background: 'var(--m-surface)',
+        border: '1px solid var(--m-line)', borderRadius: 16, overflow: 'hidden',
+      }}>
+        <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: 20, display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {loading ? (
+            <div style={{ margin: 'auto', color: 'var(--m-ink-mute)', fontSize: 13 }}>{t('aia.loading')}</div>
+          ) : messages.length === 0 ? (
+            <div style={{
+              margin: 'auto', textAlign: 'center', maxWidth: 360,
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
+            }}>
+              <div style={{
+                width: 44, height: 44, borderRadius: 12, background: 'var(--m-brand-soft)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--m-brand)', marginBottom: 6,
+              }}><I.bot size={22}/></div>
+              <div style={{ ...T.h2 }}>{t('aia.empty_title')}</div>
+              <div style={{ ...T.body }}>{t('aia.empty_sub')}</div>
+            </div>
+          ) : (
+            <>
+              {messages.map(m => <Bubble key={m.id} role={m.role} content={m.content}/>)}
+              {sending && <TypingBubble/>}
+            </>
+          )}
+          <div ref={bottomRef}/>
+        </div>
+
+        {err && (
+          <div style={{ margin: '0 20px 12px', padding: '10px 14px', borderRadius: 10, background: 'var(--m-bad-soft)', color: 'var(--m-bad)', fontSize: 13 }}>
+            {err}
+          </div>
+        )}
+
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 10, padding: '14px 20px', borderTop: '1px solid var(--m-line)' }}>
+          <textarea
+            ref={inputRef}
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={onKeyDown}
+            placeholder={t('aia.placeholder')}
+            rows={1}
+            style={{
+              flex: 1, resize: 'none', maxHeight: 140,
+              padding: '11px 14px', borderRadius: 12,
+              border: '1px solid var(--m-line)', background: 'var(--m-surface-alt)',
+              color: 'var(--m-ink)', fontFamily: 'var(--m-sans)', fontSize: 14, lineHeight: 1.4,
+              outline: 'none',
+            }}
+          />
+          <button
+            onClick={send}
+            disabled={sending || !input.trim()}
+            style={{
+              width: 42, height: 42, borderRadius: 12, flexShrink: 0, border: 'none',
+              background: 'var(--m-brand)', color: '#fff',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              opacity: (sending || !input.trim()) ? 0.45 : 1,
+              cursor: (sending || !input.trim()) ? 'not-allowed' : 'pointer',
+            }}
+          >
+            <I.send size={17}/>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

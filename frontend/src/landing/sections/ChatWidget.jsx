@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 // ── Floating AI chat widget ────────────────────────────────────────────────
 // Bottom-right launcher button → small chat panel (styled like the app's
 // existing modal cards: rounded surface, soft shadow, brand accent).
-// Talks to POST /support/chat, which the backend proxies to GigaChat.
+// Talks to POST /support/chat, which the backend proxies to OpenAI.
 
 function uid() {
   return Math.random().toString(36).slice(2);

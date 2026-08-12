@@ -58,6 +58,7 @@ export const STRINGS = {
 
     // ── Sidebar ────────────────────────────────────────────────────────
     'nav.dashboard': 'Дашборд',
+    'nav.ai_assistant': 'AI-помощник',
     'nav.scan': 'POS · Сканирование',
     'nav.crm': 'CRM',
     'nav.customers': 'Клиенты',
@@ -771,6 +772,15 @@ export const STRINGS = {
     'apt.last_used': 'Последнее использование: {date}',
     'apt.never_used': 'Не использовался',
     'apt.revoke_btn': 'Отозвать',
+
+    // ── AI-помощник ────────────────────────────────────────────────────
+    'aia.title': 'AI-помощник',
+    'aia.clear': 'Очистить',
+    'aia.clear_confirm': 'Удалить всю историю переписки без возможности восстановления?',
+    'aia.empty_title': 'Здравствуйте! Я AI-помощник Monvo.',
+    'aia.empty_sub': 'Спросите о настройке программы лояльности, клиентах, рассылках или аналитике.',
+    'aia.placeholder': 'Напишите сообщение… (Enter — отправить, Shift+Enter — новая строка)',
+    'aia.loading': 'Загрузка…',
   },
 
   uz: {
@@ -829,6 +839,7 @@ export const STRINGS = {
 
     // ── Sidebar ────────────────────────────────────────────────────────
     'nav.dashboard': 'Boshqaruv paneli',
+    'nav.ai_assistant': 'AI yordamchi',
     'nav.scan': 'POS · Skanerlash',
     'nav.crm': 'CRM',
     'nav.customers': 'Mijozlar',
@@ -1542,6 +1553,15 @@ export const STRINGS = {
     'apt.last_used': 'Oxirgi ishlatilish: {date}',
     'apt.never_used': 'Hali ishlatilmagan',
     'apt.revoke_btn': "O'chirish",
+
+    // ── AI yordamchi ───────────────────────────────────────────────────
+    'aia.title': 'AI yordamchi',
+    'aia.clear': 'Tozalash',
+    'aia.clear_confirm': "Suhbat tarixini butunlay o'chirishni tasdiqlaysizmi?",
+    'aia.empty_title': 'Salom! Men Monvo AI yordamchisiman.',
+    'aia.empty_sub': "Loyallik dasturini sozlash, mijozlar, rassilkalar yoki analitika bo'yicha savol bering.",
+    'aia.placeholder': 'Xabar yozing... (Enter — yuborish, Shift+Enter — yangi qator)',
+    'aia.loading': 'Yuklanmoqda…',
   },
 };
 

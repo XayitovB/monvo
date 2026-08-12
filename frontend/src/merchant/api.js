@@ -330,6 +330,11 @@ const api = {
   }),
   posDisconnect: (provider) => request(`/merchants/me/pos-integrations/${provider}`, { method: 'DELETE' }),
   posVerify:     (provider) => request(`/merchants/me/pos-integrations/${provider}/verify`, { method: 'POST', body: {} }),
+
+  // ── AI yordamchi (to'liq ekranli chat, xotirasi bazada saqlanadi) ──────
+  aiAssistantMessages: () => request('/merchant/ai-assistant/messages'),
+  aiAssistantSend:     (message) => request('/merchant/ai-assistant', { method: 'POST', body: { message } }),
+  aiAssistantClear:    () => request('/merchant/ai-assistant/messages', { method: 'DELETE' }),
 };
 
 export default api;

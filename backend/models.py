@@ -1358,3 +1358,27 @@ class TelegramBotUser(Base):
         UniqueConstraint("bot", "telegram_id", name="uq_botuser_bot_tgid"),
         Index("ix_botuser_bot_lastseen", "bot", "last_seen"),
     )
+
+
+# ── AI yordamchi xabarlari (admin va merchant panellardagi to'liq ekranli chat)
+class AiChatMessage(Base):
+    """Admin/merchant panellaridagi AI yordamchi suhbat tarixi.
+
+    `owner_type` — 'admin' | 'merchant'. `owner_key` — admin uchun JWT
+    payload'dagi `sub` (string), merchant uchun `str(merchant.id)`. Bitta
+    jadval ikkala rol uchun ham ishlatiladi — alohida jadval ochish shart
+    emas, chunki struktura bir xil va merchant/admin identifikatorlari
+    turlicha (int vs legacy string) bo'lgani uchun umumiy string kalit
+    qulayroq."""
+    __tablename__ = "ai_chat_messages"
+
+    id = Column(Integer, primary_key=True)
+    owner_type = Column(String(20), nullable=False)
+    owner_key = Column(String(100), nullable=False)
+    role = Column(String(20), nullable=False)  # "user" | "assistant"
+    content = Column(Text, nullable=False)
+    created_at = Column(DateTime(timezone=True), default=_now)
+
+    __table_args__ = (
+        Index("ix_ai_chat_owner_created", "owner_type", "owner_key", "created_at"),
+    )

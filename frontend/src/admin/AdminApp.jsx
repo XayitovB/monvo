@@ -41,6 +41,7 @@ import CardDesigner from './pages/CardDesigner'
 import WebScanner from './pages/WebScanner'
 import CustomerCRM from './pages/CustomerCRM'
 import MerchantAnalytics from './pages/MerchantAnalytics'
+import AiAssistant from './pages/AiAssistant'
 import {
   MerchantBranches, MerchantStaff, MerchantCampaigns,
   MerchantNotifications, MerchantReviews,
@@ -98,6 +99,7 @@ export default function AdminApp() {
                 <Route path="landing-logos"   element={<LandingLogos />} />
                 <Route path="landing-reviews" element={<LandingReviews />} />
                 <Route path="landing-social"  element={<LandingSocial />} />
+                <Route path="ai-assistant"  element={<AiAssistant />} />
               </Routes>
             </AdminLayout>
           </PrivateRoute>

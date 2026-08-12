@@ -124,19 +124,13 @@ class Settings(BaseSettings):
     PAYME_MIN_AMOUNT: int = 1000
     PAYME_MAX_AMOUNT: int = 100_000_000
 
-    # ── GigaChat (Sber) — landing page AI chat vidjeti ────────────────────────
-    # 1. https://developers.sber.ru/studio/workspaces → GigaChat API → Ilova yarating
-    # 2. "Авторизационные данные" (Client ID:Client Secret) ni Base64'da oling —
-    #    bu qiymat to'g'ridan-to'g'ri GIGACHAT_AUTH_KEY bo'ladi
-    # 3. Bo'sh bo'lsa — chat vidjeti UI'da ko'rinadi, lekin javob o'rniga
+    # ── OpenAI — landing page AI chat vidjeti ─────────────────────────────────
+    # 1. https://platform.openai.com/api-keys → API kalit yarating
+    # 2. Bo'sh bo'lsa — chat vidjeti UI'da ko'rinadi, lekin javob o'rniga
     #    "sozlanmagan" degan xabar qaytaradi (backend qulamaydi)
-    GIGACHAT_AUTH_KEY: str = ""
-    GIGACHAT_SCOPE: str = "GIGACHAT_API_PERS"
-    # Sber sertifikatlari (Mintsifry CA) standart trust store'da yo'q. Server
-    # ushbu CA'ni o'rnatgan bo'lsa True qoldiring; aks holda vaqtincha False
-    # qiling (TLS tekshiruvi o'chadi — faqat ishonchli tarmoqda ishlating).
-    GIGACHAT_VERIFY_SSL: bool = True
-    GIGACHAT_SYSTEM_PROMPT: str = (
+    OPENAI_API_KEY: str = ""
+    OPENAI_MODEL: str = "gpt-4o-mini"
+    OPENAI_SYSTEM_PROMPT: str = (
         "Siz \"Monvo yordamchisi\" — FAQAT Monvo (O'zbekistondagi QR "
         "loyalty-kartalar platformasi) haqida ma'lumot beruvchi maxsus "
         "botsiz. Sizning bilim sohangiz FAQAT: Monvo loyalty kartalari, "
@@ -264,8 +258,8 @@ def _warn_production(s: "Settings") -> None:
         warnings.append("METRICS_TOKEN bo'sh — /metrics endpoint hammaga ochiq")
     if not s.ENCRYPTION_KEY:
         warnings.append("ENCRYPTION_KEY bo'sh — POS kredensiallari bazada ochiq saqlanadi")
-    if not s.GIGACHAT_AUTH_KEY:
-        warnings.append("GIGACHAT_AUTH_KEY o'rnatilmagan — landing chat vidjeti javob bermaydi")
+    if not s.OPENAI_API_KEY:
+        warnings.append("OPENAI_API_KEY o'rnatilmagan — landing chat vidjeti javob bermaydi")
     for w in warnings:
         print(f"⚠️  CONFIG WARNING: {w}", file=sys.stderr)
 

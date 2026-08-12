@@ -10,6 +10,7 @@ import MerchantLayout from './layout/MerchantLayout';
 import Login from './screens/Login';
 import Onboarding from './screens/Onboarding';
 import Dashboard from './screens/Dashboard';
+import AiAssistant from './screens/AiAssistant';
 import Customers from './screens/Customers';
 import CustomerDetail from './screens/CustomerDetail';
 import Cards from './screens/Cards';
@@ -37,6 +38,7 @@ export default function MerchantApp() {
           <Route element={<RequireAuth><RequireSubscription><MerchantLayout/></RequireSubscription></RequireAuth>}>
             <Route index element={<Navigate to="/dashboard" replace/>}/>
             <Route path="/dashboard" element={<Dashboard/>}/>
+            <Route path="/ai-assistant" element={<AiAssistant/>}/>
             <Route path="/customers" element={<Customers/>}/>
             <Route path="/customers/:id" element={<CustomerDetail/>}/>
             <Route path="/cards" element={<Cards/>}/>

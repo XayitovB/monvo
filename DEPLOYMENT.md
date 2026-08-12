@@ -8,7 +8,7 @@ VPS deploy va kelajakda o'zgartirish kiritish bo'yicha to'liq qo'llanma.
 
 | Komponent | Qiymat |
 |-----------|--------|
-| VPS | `84.247.182.138` (Ubuntu) |
+| VPS | `169.58.50.8` (Ubuntu) |
 | **Hardware** | **8 vCPU, 24 GB RAM, 200 GB NVMe, 600 Mbit/s** |
 | Domen | `monvo.uz`, `www.monvo.uz`, `app.monvo.uz` |
 | DNS | Cloudflare (DNS only — kulrang bulut) |
@@ -61,7 +61,7 @@ VPS deploy va kelajakda o'zgartirish kiritish bo'yicha to'liq qo'llanma.
 
 VPS da SSH bilan ulan:
 ```bash
-ssh root@84.247.182.138
+ssh root@169.58.50.8
 cd /opt/monvo/backend
 ```
 
@@ -122,7 +122,7 @@ Lokal kompyuterdan `git push` qilganda VPS avtomatik yangilanadi.
 Sozlanishi:
 1. VPS da `/opt/deploy.sh` skript bor
 2. GitHub repo → Settings → Secrets:
-   - `VPS_HOST=84.247.182.138`
+   - `VPS_HOST=169.58.50.8`
    - `VPS_USER=root`
    - `VPS_PORT=22`
    - `VPS_SSH_KEY` (private key)
@@ -240,7 +240,7 @@ DATABASE_URL=postgresql+asyncpg://postgres:PAROL@postgres:5432/monvo
 
 Lokal kompyuterdan (PowerShell):
 ```powershell
-scp "monvo-f067e-firebase-adminsdk-*.json" root@84.247.182.138:/opt/monvo/backend/firebase-adminsdk.json
+scp "monvo-f067e-firebase-adminsdk-*.json" root@169.58.50.8:/opt/monvo/backend/firebase-adminsdk.json
 ```
 
 VPS da:
@@ -253,7 +253,7 @@ chmod 600 /opt/monvo/backend/firebase-adminsdk.json
 DNS to'g'ri tarqalganini tekshir:
 ```bash
 dig +short monvo.uz
-# 84.247.182.138 chiqishi kerak
+# 169.58.50.8 chiqishi kerak
 ```
 
 Sertifikat ol:
@@ -480,3 +480,4 @@ Keyin foydalanuvchi 1000+ bo'lganda monitoring qaytaring (`docker-compose.yml` g
 | Sana | O'zgarish |
 |------|-----------|
 | 2026-05-24 | Birinchi production deploy. VPS: 84.247.182.138. 8 vCPU / 24 GB RAM uchun moslashtirilgan. |
+| 2026-08-12 | VPS yangi manzilga ko'chirildi: `169.58.50.8`. Server `/opt/` ostida boshqa loyihalar bilan bo'lishiladi (kardly, turboads, websocket-games va h.k.) — faqat `/opt/monvo/` ichida ishlash kerak. |

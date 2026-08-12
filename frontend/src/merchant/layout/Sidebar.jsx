@@ -122,6 +122,7 @@ export default function Sidebar({ mobile = false, open = false, onClose }) {
       <div style={{ flex: 1, overflowY: 'auto', marginTop: 4, marginLeft: -2, paddingRight: 2 }}>
         <SidebarSection>
           <SidebarItem icon={<I.home/>} label={t('nav.dashboard')} to="/dashboard"/>
+          <SidebarItem icon={<I.bot/>} label={t('nav.ai_assistant')} to="/ai-assistant"/>
         </SidebarSection>
 
         <SidebarSection title={t('nav.crm')}>

@@ -51,6 +51,14 @@ export const I = {
   user:        (p) => <Icon {...p} d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8"/>,
   lock:        (p) => <Icon {...p} d="M5 11h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2zM7 11V7a5 5 0 0 1 10 0v4"/>,
   logout:      (p) => <Icon {...p} d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>,
+  bot:         (p) => <Icon {...p} d={<>
+    <rect x="4" y="9" width="16" height="11" rx="2"/>
+    <path d="M12 9V5H9"/>
+    <circle cx="9" cy="14" r="1"/>
+    <circle cx="15" cy="14" r="1"/>
+    <path d="M2 14h2M20 14h2"/>
+  </>}/>,
+  send:        (p) => <Icon {...p} d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/>,
 };
 
 export const T = {

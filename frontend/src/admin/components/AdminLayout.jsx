@@ -5,7 +5,7 @@ import {
   FileText, Bell, Link2, LogOut, Menu, X, BarChart2,
   RefreshCw, CalendarClock, Sun, Moon, Code2, Server, Settings,
   Megaphone, DollarSign, Package, Shield, Activity, PieChart,
-  Trophy, Flag, Gamepad2, Sparkles, Plug, Image, MessageSquare, Bug,
+  Trophy, Flag, Gamepad2, Sparkles, Plug, Image, MessageSquare, Bug, Bot,
 } from 'lucide-react'
 import './AdminLayout.css'
 import { APP_VERSION } from '../../version'
@@ -16,6 +16,7 @@ const NAV_SECTIONS = [
     title: null,
     items: [
       { to: '/panel/dashboard', icon: <LayoutDashboard size={17}/>, label: 'Boshqaruv' },
+      { to: '/panel/ai-assistant', icon: <Bot size={17}/>, label: 'AI yordamchi' },
     ],
   },
   {
